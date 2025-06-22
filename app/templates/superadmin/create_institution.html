@@ -1,0 +1,508 @@
+{% extends "base.html" %}
+
+{% block title %}Nueva Institución - {{ super() }}{% endblock %}
+{% block page_title %}Nueva Institución{% endblock %}
+
+{% block extra_css %}
+<style>
+    .form-container {
+        background: white;
+        border-radius: 16px;
+        padding: 2.5rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        margin-bottom: 2rem;
+    }
+
+    .form-header {
+        text-align: center;
+        margin-bottom: 2rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 2px solid #f1f3f4;
+    }
+
+    .form-header h1 {
+        color: #1f2937;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+
+    .form-header p {
+        color: #6b7280;
+        font-size: 1.1rem;
+    }
+
+    .form-section {
+        margin-bottom: 2rem;
+    }
+
+    .section-title {
+        font-size: 1.3rem;
+        font-weight: 600;
+        color: #374151;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: #374151;
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+
+    .form-control {
+        border: 2px solid #e5e7eb;
+        border-radius: 8px;
+        padding: 0.75rem 1rem;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        background-color: #ffffff;
+    }
+
+    .form-control:focus {
+        border-color: #8E2DE2;
+        box-shadow: 0 0 0 3px rgba(142, 45, 226, 0.1);
+        outline: none;
+    }
+
+    .form-control:invalid {
+        border-color: #ef4444;
+    }
+
+    .form-text {
+        color: #6b7280;
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #8E2DE2 0%, #4A00E0 100%);
+        border: none;
+        border-radius: 10px;
+        padding: 0.75rem 2rem;
+        font-size: 1.1rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(142, 45, 226, 0.4);
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(142, 45, 226, 0.6);
+    }
+
+    .btn-secondary {
+        background: #6b7280;
+        border: none;
+        border-radius: 10px;
+        padding: 0.75rem 1.5rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .btn-secondary:hover {
+        background: #4b5563;
+        transform: translateY(-1px);
+    }
+
+    .input-group-text {
+        background: #f9fafb;
+        border: 2px solid #e5e7eb;
+        border-right: none;
+        color: #6b7280;
+    }
+
+    .input-group .form-control {
+        border-left: none;
+    }
+
+    .input-group:focus-within .input-group-text {
+        border-color: #8E2DE2;
+        background: rgba(142, 45, 226, 0.05);
+    }
+
+    .required {
+        color: #ef4444;
+    }
+
+    .form-actions {
+        margin-top: 3rem;
+        padding-top: 2rem;
+        border-top: 2px solid #f1f3f4;
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+    }
+
+    @media (max-width: 768px) {
+        .form-container {
+            padding: 1.5rem;
+        }
+        
+        .form-actions {
+            flex-direction: column;
+        }
+        
+        .btn {
+            width: 100%;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-xl-6">
+            <div class="form-container">
+                <div class="form-header">
+                    <h1>
+                        <i class="fas fa-building text-primary"></i>
+                        Crear Nueva Institución
+                    </h1>
+                    <p>Complete la información para registrar una nueva institución educativa en el sistema</p>
+                </div>
+
+                <form method="POST" novalidate>
+                    <!-- Información Básica -->
+                    <div class="form-section">
+                        <h3 class="section-title">
+                            <i class="fas fa-info-circle text-primary"></i>
+                            Información Básica
+                        </h3>
+
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div class="form-group">
+                                    <label for="name" class="form-label">
+                                        Nombre de la Institución <span class="required">*</span>
+                                    </label>
+                                    <input type="text" 
+                                           class="form-control" 
+                                           id="name" 
+                                           name="name" 
+                                           placeholder="Ej: Colegio San José"
+                                           required>
+                                    <div class="form-text">Nombre completo y oficial de la institución</div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="code" class="form-label">
+                                        Código <span class="required">*</span>
+                                    </label>
+                                    <input type="text" 
+                                           class="form-control" 
+                                           id="code" 
+                                           name="code" 
+                                           placeholder="CSJ001"
+                                           pattern="[A-Z0-9]{3,10}"
+                                           required>
+                                    <div class="form-text">Código único (3-10 caracteres)</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="description" class="form-label">Descripción</label>
+                            <textarea class="form-control" 
+                                      id="description" 
+                                      name="description" 
+                                      rows="3"
+                                      placeholder="Breve descripción de la institución educativa..."></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Ubicación -->
+                    <div class="form-section">
+                        <h3 class="section-title">
+                            <i class="fas fa-map-marker-alt text-primary"></i>
+                            Ubicación
+                        </h3>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="city" class="form-label">
+                                        Ciudad <span class="required">*</span>
+                                    </label>
+                                    <input type="text" 
+                                           class="form-control" 
+                                           id="city" 
+                                           name="city" 
+                                           placeholder="Barranquilla"
+                                           required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="state" class="form-label">Departamento</label>
+                                    <input type="text" 
+                                           class="form-control" 
+                                           id="state" 
+                                           name="state" 
+                                           placeholder="Atlántico">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="address" class="form-label">Dirección</label>
+                            <input type="text" 
+                                   class="form-control" 
+                                   id="address" 
+                                   name="address" 
+                                   placeholder="Calle 45 #23-67, Barrio Norte">
+                        </div>
+                    </div>
+
+                    <!-- Información de Contacto -->
+                    <div class="form-section">
+                        <h3 class="section-title">
+                            <i class="fas fa-phone text-primary"></i>
+                            Información de Contacto
+                        </h3>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="phone" class="form-label">Teléfono Principal</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">
+                                            <i class="fas fa-phone"></i>
+                                        </span>
+                                        <input type="tel" 
+                                               class="form-control" 
+                                               id="phone" 
+                                               name="phone" 
+                                               placeholder="+57 5 3601234">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="email" class="form-label">Email Institucional</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">
+                                            <i class="fas fa-envelope"></i>
+                                        </span>
+                                        <input type="email" 
+                                               class="form-control" 
+                                               id="email" 
+                                               name="email" 
+                                               placeholder="info@colegio.edu.co">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="website" class="form-label">Sitio Web</label>
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="fas fa-globe"></i>
+                                </span>
+                                <input type="url" 
+                                       class="form-control" 
+                                       id="website" 
+                                       name="website" 
+                                       placeholder="https://www.colegio.edu.co">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Configuración Inicial -->
+                    <div class="form-section">
+                        <h3 class="section-title">
+                            <i class="fas fa-cogs text-primary"></i>
+                            Configuración Inicial
+                        </h3>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="type" class="form-label">Tipo de Institución</label>
+                                    <select class="form-control" id="type" name="type">
+                                        <option value="">Seleccionar...</option>
+                                        <option value="colegio">Colegio</option>
+                                        <option value="universidad">Universidad</option>
+                                        <option value="instituto">Instituto Técnico</option>
+                                        <option value="academia">Academia</option>
+                                        <option value="otro">Otro</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="status" class="form-label">Estado Inicial</label>
+                                    <select class="form-control" id="status" name="status">
+                                        <option value="active" selected>Activa</option>
+                                        <option value="inactive">Inactiva</option>
+                                        <option value="pending">Pendiente</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <div class="form-check">
+                                <input class="form-check-input" 
+                                       type="checkbox" 
+                                       id="create_admin" 
+                                       name="create_admin" 
+                                       checked>
+                                <label class="form-check-label" for="create_admin">
+                                    Crear automáticamente usuario administrador para esta institución
+                                </label>
+                            </div>
+                            <div class="form-text">
+                                Se enviará un email con las credenciales de acceso al administrador
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Botones de Acción -->
+                    <div class="form-actions">
+                        <a href="{{ url_for('superadmin.institutions') }}" class="btn btn-secondary">
+                            <i class="fas fa-times me-2"></i>
+                            Cancelar
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-plus me-2"></i>
+                            Crear Institución
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Generar código automático basado en el nombre
+    const nameInput = document.getElementById('name');
+    const codeInput = document.getElementById('code');
+    
+    nameInput.addEventListener('input', function() {
+        if (!codeInput.value) {
+            const name = this.value.trim();
+            if (name) {
+                // Extraer primeras letras de las palabras principales
+                const words = name.split(' ').filter(word => 
+                    word.length > 2 && 
+                    !['de', 'del', 'la', 'el', 'los', 'las', 'y', 'e'].includes(word.toLowerCase())
+                );
+                
+                let code = '';
+                words.slice(0, 3).forEach(word => {
+                    code += word.charAt(0).toUpperCase();
+                });
+                
+                // Añadir números si es muy corto
+                if (code.length < 3) {
+                    code += '001';
+                } else {
+                    code += '00' + Math.floor(Math.random() * 10);
+                }
+                
+                codeInput.value = code;
+            }
+        }
+    });
+
+    // Validación en tiempo real
+    const form = document.querySelector('form');
+    const requiredFields = form.querySelectorAll('[required]');
+    
+    requiredFields.forEach(field => {
+        field.addEventListener('blur', function() {
+            validateField(this);
+        });
+        
+        field.addEventListener('input', function() {
+            if (this.classList.contains('is-invalid')) {
+                validateField(this);
+            }
+        });
+    });
+    
+    function validateField(field) {
+        const isValid = field.checkValidity();
+        
+        if (isValid) {
+            field.classList.remove('is-invalid');
+            field.classList.add('is-valid');
+        } else {
+            field.classList.remove('is-valid');
+            field.classList.add('is-invalid');
+        }
+        
+        return isValid;
+    }
+    
+    // Validación antes de envío
+    form.addEventListener('submit', function(e) {
+        let isFormValid = true;
+        
+        requiredFields.forEach(field => {
+            if (!validateField(field)) {
+                isFormValid = false;
+            }
+        });
+        
+        if (!isFormValid) {
+            e.preventDefault();
+            
+            // Scroll al primer campo inválido
+            const firstInvalid = form.querySelector('.is-invalid');
+            if (firstInvalid) {
+                firstInvalid.scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'center' 
+                });
+                firstInvalid.focus();
+            }
+            
+            // Mostrar mensaje de error
+            const alert = document.createElement('div');
+            alert.className = 'alert alert-danger alert-dismissible fade show';
+            alert.innerHTML = `
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                Por favor, complete todos los campos requeridos correctamente.
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            
+            form.insertBefore(alert, form.firstChild);
+            
+            // Auto-remover después de 5 segundos
+            setTimeout(() => {
+                if (alert.parentNode) {
+                    alert.remove();
+                }
+            }, 5000);
+        }
+    });
+    
+    // Formatear teléfono
+    const phoneInput = document.getElementById('phone');
+    phoneInput.addEventListener('input', function() {
+        let value = this.value.replace(/\D/g, '');
+        if (value.startsWith('57')) {
+            value = '+57 ' + value.substring(2);
+        } else if (value.length > 0 && !value.startsWith('+')) {
+            value = '+57 ' + value;
+        }
+        this.value = value;
+    });
+});
+</script>
+{% endblock %}

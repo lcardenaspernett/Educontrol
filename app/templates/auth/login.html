@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iniciar Sesión - EduControl</title>
+    
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --hero-gradient: linear-gradient(135deg, #8E2DE2 0%, #4A00E0 100%);
+            --purpura-principal: #8E2DE2;
+            --purpura-oscuro: #4A00E0;
+            --color-azul-hover: #3B82F6;
+            --texto-blanco: #ffffff;
+            --texto-gris: #64748b;
+            --borde-radius: 16px;
+            --transicion: all 0.3s ease;
+        }
+
+        body {
+            background: var(--hero-gradient);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* EFECTOS DE FONDO MEJORADOS */
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                linear-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+            background-size: 60px 60px;
+            animation: gridMove 20s linear infinite;
+            opacity: 0.6;
+        }
+
+        body::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.15) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.2) 0%, transparent 50%),
+                        radial-gradient(circle at 40% 80%, rgba(255, 255, 255, 0.15) 0%, transparent 50%);
+            animation: floatingBubbles 25s ease-in-out infinite;
+        }
+
+        @keyframes gridMove {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(60px, 60px); }
+        }
+
+        @keyframes floatingBubbles {
+            0%, 100% { 
+                transform: translate(0, 0) scale(1);
+                opacity: 0.4;
+            }
+            25% { 
+                transform: translate(15px, -20px) scale(1.2);
+                opacity: 0.6;
+            }
+            50% { 
+                transform: translate(-10px, 15px) scale(0.8);
+                opacity: 0.3;
+            }
+            75% { 
+                transform: translate(20px, 10px) scale(1.1);
+                opacity: 0.7;
+            }
+        }
+
+        /* LÍNEAS GEOMÉTRICAS */
+        .geometric-lines {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .geometric-lines::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: 
+                linear-gradient(45deg, transparent 0%, rgba(255, 255, 255, 0.1) 1px, transparent 2px),
+                linear-gradient(-45deg, transparent 0%, rgba(255, 255, 255, 0.08) 1px, transparent 2px);
+            background-size: 80px 80px, 120px 120px;
+            animation: diagonalMove 30s linear infinite;
+        }
+
+        .geometric-lines::after {
+            content: '';
+            position: absolute;
+            top: 20%;
+            left: 10%;
+            width: 300px;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            animation: scanLine 8s ease-in-out infinite;
+            transform: rotate(15deg);
+        }
+
+        @keyframes diagonalMove {
+            0% { transform: translate(0, 0) rotate(0deg); }
+            100% { transform: translate(80px, 80px) rotate(360deg); }
+        }
+
+        @keyframes scanLine {
+            0%, 100% {
+                transform: rotate(15deg) scaleX(0);
+                opacity: 0;
+            }
+            50% {
+                transform: rotate(15deg) scaleX(1);
+                opacity: 1;
+            }
+        }
+
+        /* PARTÍCULAS FLOTANTES */
+        .floating-particles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 1;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 50%;
+            animation: float 15s infinite linear;
+        }
+
+        .particle:nth-child(1) { left: 10%; animation-delay: -2s; animation-duration: 12s; }
+        .particle:nth-child(2) { left: 20%; animation-delay: -4s; animation-duration: 18s; }
+        .particle:nth-child(3) { left: 30%; animation-delay: -6s; animation-duration: 15s; }
+        .particle:nth-child(4) { left: 40%; animation-delay: -8s; animation-duration: 20s; }
+        .particle:nth-child(5) { left: 50%; animation-delay: -10s; animation-duration: 14s; }
+        .particle:nth-child(6) { left: 60%; animation-delay: -12s; animation-duration: 16s; }
+        .particle:nth-child(7) { left: 70%; animation-delay: -14s; animation-duration: 22s; }
+        .particle:nth-child(8) { left: 80%; animation-delay: -16s; animation-duration: 13s; }
+        .particle:nth-child(9) { left: 90%; animation-delay: -18s; animation-duration: 17s; }
+
+        @keyframes float {
+            0% {
+                transform: translateY(100vh) scale(0);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+                transform: translateY(90vh) scale(1);
+            }
+            90% {
+                opacity: 1;
+                transform: translateY(-10vh) scale(1);
+            }
+            100% {
+                transform: translateY(-10vh) scale(0);
+                opacity: 0;
+            }
+        }
+
+        .login-container {
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            max-width: 500px;
+            padding: 0 2rem;
+        }
+
+        .login-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 24px;
+            padding: 3rem 2.5rem;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            animation: slideUp 0.8s ease-out;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .login-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--hero-gradient);
+        }
+
+        .login-card::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: 
+                radial-gradient(circle, rgba(142, 45, 226, 0.05) 0%, transparent 70%),
+                conic-gradient(from 0deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            animation: cardWave 12s ease-in-out infinite;
+            z-index: -1;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(60px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes cardWave {
+            0%, 100% { 
+                transform: rotate(0deg) scale(1);
+                opacity: 0.3;
+            }
+            50% { 
+                transform: rotate(180deg) scale(1.2);
+                opacity: 0.6;
+            }
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+
+        .login-logo {
+            width: 80px;
+            height: 80px;
+            background: var(--hero-gradient);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            box-shadow: 0 10px 30px rgba(142, 45, 226, 0.4);
+            animation: logoPulse 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes logoPulse {
+            from {
+                box-shadow: 0 10px 30px rgba(142, 45, 226, 0.4);
+                transform: scale(1);
+            }
+            to {
+                box-shadow: 0 15px 40px rgba(142, 45, 226, 0.6);
+                transform: scale(1.05);
+            }
+        }
+
+        .login-logo i {
+            font-size: 2.5rem;
+            color: var(--texto-blanco);
+            filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.3));
+        }
+
+        .login-title {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--purpura-oscuro);
+            margin-bottom: 0.5rem;
+            letter-spacing: -1px;
+        }
+
+        .login-subtitle {
+            color: var(--texto-gris);
+            font-size: 1rem;
+            margin-bottom: 0;
+            font-weight: 500;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 1rem;
+            font-size: 1.2rem;
+            z-index: 2;
+            color: var(--purpura-principal);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 20px;
+            height: 20px;
+            filter: drop-shadow(0 2px 4px rgba(142, 45, 226, 0.3));
+        }
+
+        .input-icon.user-icon::before {
+            content: '👤';
+            font-family: 'Segoe UI Emoji', 'Apple Color Emoji', 'Noto Color Emoji', sans-serif;
+        }
+
+        .input-icon.lock-icon::before {
+            content: '🔒';
+            font-family: 'Segoe UI Emoji', 'Apple Color Emoji', 'Noto Color Emoji', sans-serif;
+        }
+
+        .form-control {
+            width: 100%;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 0.875rem 1rem 0.875rem 3.5rem;
+            font-size: 1rem;
+            transition: var(--transicion);
+            background-color: #ffffff;
+        }
+
+        .form-control:focus {
+            border-color: var(--purpura-principal);
+            box-shadow: 0 0 0 3px rgba(142, 45, 226, 0.1);
+            outline: none;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 1rem;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            font-size: 1.1rem;
+            z-index: 2;
+            padding: 0.3rem;
+            color: var(--purpura-principal);
+            transition: var(--transicion);
+            width: 34px;
+            height: 34px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            filter: drop-shadow(0 2px 4px rgba(142, 45, 226, 0.3));
+        }
+
+        .password-toggle:hover {
+            background: rgba(142, 45, 226, 0.1);
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(142, 45, 226, 0.2);
+        }
+
+        .password-toggle::before {
+            content: '👁️';
+            font-family: 'Segoe UI Emoji', 'Apple Color Emoji', 'Noto Color Emoji', sans-serif;
+        }
+
+        .password-toggle.hidden::before {
+            content: '🙈';
+            font-family: 'Segoe UI Emoji', 'Apple Color Emoji', 'Noto Color Emoji', sans-serif;
+        }
+
+        .btn-login {
+            background: var(--hero-gradient);
+            border: none;
+            border-radius: 12px;
+            padding: 0.875rem 2rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--texto-blanco);
+            width: 100%;
+            transition: var(--transicion);
+            box-shadow: 0 4px 15px rgba(142, 45, 226, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-login::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.6s ease;
+        }
+
+        .btn-login:hover::before {
+            left: 100%;
+        }
+
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(142, 45, 226, 0.6);
+            background: linear-gradient(135deg, var(--color-azul-hover), var(--purpura-principal));
+        }
+
+        .btn-login:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .form-check-input:checked {
+            background-color: var(--purpura-principal);
+            border-color: var(--purpura-principal);
+        }
+
+        .form-check-input:focus {
+            border-color: var(--purpura-principal);
+            box-shadow: 0 0 0 0.25rem rgba(142, 45, 226, 0.25);
+        }
+
+        .login-footer {
+            text-align: center;
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .login-footer a {
+            color: var(--purpura-principal);
+            text-decoration: none;
+            font-weight: 600;
+            transition: var(--transicion);
+        }
+
+        .login-footer a:hover {
+            color: var(--purpura-oscuro);
+            text-decoration: underline;
+        }
+
+        .alert {
+            border-radius: 12px;
+            border: none;
+            padding: 1rem 1.25rem;
+            margin-bottom: 1.5rem;
+            font-weight: 500;
+        }
+
+        .alert-danger {
+            background: rgba(239, 68, 68, 0.1);
+            color: #dc2626;
+            border-left: 4px solid #dc2626;
+        }
+
+        .alert-success {
+            background: rgba(16, 185, 129, 0.1);
+            color: #059669;
+            border-left: 4px solid #059669;
+        }
+
+        .alert-info {
+            background: rgba(59, 130, 246, 0.1);
+            color: #2563eb;
+            border-left: 4px solid #2563eb;
+        }
+
+        .credentials-help {
+            background: rgba(142, 45, 226, 0.05);
+            border: 1px solid rgba(142, 45, 226, 0.2);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-top: 1.5rem;
+            font-size: 0.9rem;
+        }
+
+        .credentials-help h6 {
+            color: var(--purpura-principal);
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .credentials-help code {
+            background: rgba(142, 45, 226, 0.1);
+            color: var(--purpura-oscuro);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+        }
+
+        .info-card {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 1rem;
+            margin-top: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            width: 100%;
+            z-index: 10;
+            position: relative;
+        }
+
+        .info-text {
+            color: var(--texto-blanco);
+            font-size: 0.9rem;
+            margin: 0;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .login-container {
+                padding: 0 1rem;
+            }
+            
+            .login-card {
+                padding: 2rem 1.5rem;
+            }
+            
+            .login-title {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Fondo animado con efectos -->
+    <div class="geometric-lines"></div>
+    
+    <!-- Partículas flotantes -->
+    <div class="floating-particles">
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+    </div>
+
+    <div class="login-container">
+        <div class="login-card">
+            <div class="login-header">
+                <div class="login-logo">
+                    <i class="fas fa-graduation-cap"></i>
+                </div>
+                <h1 class="login-title">EduControl</h1>
+                <p class="login-subtitle">Sistema de Gestión Educativa</p>
+            </div>
+
+            <!-- Mensajes Flash -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ 'danger' if category == 'error' else category }}" role="alert">
+                            <i class="fas fa-{{ 'exclamation-triangle' if category in ['error', 'danger'] else 'check-circle' if category == 'success' else 'info-circle' }} me-2"></i>
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <form method="POST" id="loginForm" novalidate>
+                <div class="form-group">
+                    <label for="email_or_username" class="form-label">
+                        <i class="fas fa-user me-2"></i>
+                        Email o Usuario
+                    </label>
+                    <div class="input-wrapper">
+                        <span class="input-icon user-icon"></span>
+                        <input type="text" 
+                               class="form-control" 
+                               id="email_or_username" 
+                               name="email_or_username"
+                               placeholder="tu-email@ejemplo.com o usuario"
+                               required 
+                               autocomplete="username"
+                               value="{{ request.form.get('email_or_username', '') }}">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="password" class="form-label">
+                        <i class="fas fa-lock me-2"></i>
+                        Contraseña
+                    </label>
+                    <div class="input-wrapper">
+                        <span class="input-icon lock-icon"></span>
+                        <input type="password" 
+                               class="form-control" 
+                               id="password" 
+                               name="password"
+                               placeholder="Tu contraseña"
+                               required 
+                               autocomplete="current-password">
+                        <button class="password-toggle" type="button" id="togglePassword"></button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="form-check">
+                        <input class="form-check-input" 
+                               type="checkbox" 
+                               id="remember_me" 
+                               name="remember_me"
+                               {{ 'checked' if request.form.get('remember_me') }}>
+                        <label class="form-check-label" for="remember_me">
+                            Recordar mi sesión
+                        </label>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-login" id="loginBtn">
+                    <i class="fas fa-sign-in-alt me-2"></i>
+                    Iniciar Sesión
+                </button>
+            </form>
+
+            
+
+            <div class="login-footer">
+                <a href="{{ url_for('auth.forgot_password') }}">¿Olvidaste tu contraseña?</a>
+                <br>
+                <a href="{{ url_for('main.index') }}" class="mt-2 d-inline-block">
+                    <i class="fas fa-arrow-left me-1"></i>
+                    Volver al inicio
+                </a>
+            </div>
+        </div>
+
+        <div class="info-card">
+            <p class="info-text">
+                <i class="fas fa-info-circle"></i>
+                Solo usuarios registrados por el administrador pueden acceder
+            </p>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Auto focus en el primer campo
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('email_or_username').focus();
+            
+            // Toggle password visibility
+            const togglePassword = document.getElementById('togglePassword');
+            const passwordField = document.getElementById('password');
+
+            if (togglePassword && passwordField) {
+                togglePassword.addEventListener('click', function() {
+                    const type = passwordField.getAttribute('type') === 'password' ? 'text' : 'password';
+                    passwordField.setAttribute('type', type);
+                    
+                    // Cambiar la clase para el emoji
+                    if (type === 'text') {
+                        togglePassword.classList.add('hidden');
+                    } else {
+                        togglePassword.classList.remove('hidden');
+                    }
+                });
+            }
+        });
+
+        // Manejar envío del formulario
+        const loginForm = document.getElementById('loginForm');
+        const loginBtn = document.getElementById('loginBtn');
+        let isSubmitting = false;
+
+        loginForm.addEventListener('submit', function(e) {
+            // Prevenir envío múltiple
+            if (isSubmitting) {
+                e.preventDefault();
+                return;
+            }
+
+            const emailOrUsername = document.getElementById('email_or_username').value.trim();
+            const password = document.getElementById('password').value;
+
+            if (!emailOrUsername || !password) {
+                e.preventDefault();
+                
+                // Mostrar error si no existe
+                if (!document.querySelector('.alert-danger')) {
+                    const alert = document.createElement('div');
+                    alert.className = 'alert alert-danger';
+                    alert.innerHTML = '<i class="fas fa-exclamation-triangle me-2"></i>Por favor, completa todos los campos';
+                    loginForm.insertBefore(alert, loginForm.firstChild);
+                    
+                    // Auto-remover después de 5 segundos
+                    setTimeout(() => alert.remove(), 5000);
+                }
+                return;
+            }
+
+            // Marcar como enviando
+            isSubmitting = true;
+            
+            // Cambiar el botón
+            const originalText = loginBtn.innerHTML;
+            loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Iniciando sesión...';
+            loginBtn.disabled = true;
+            
+            // Timeout de seguridad para restablecer el botón si algo falla
+            setTimeout(() => {
+                if (isSubmitting) {
+                    loginBtn.innerHTML = originalText;
+                    loginBtn.disabled = false;
+                    isSubmitting = false;
+                }
+            }, 10000); // 10 segundos
+        });
+
+        // Relleno rápido con credenciales de prueba
+        document.addEventListener('keydown', function(e) {
+            // Ctrl + 1 = Superadmin
+            if (e.ctrlKey && e.key === '1') {
+                e.preventDefault();
+                document.getElementById('email_or_username').value = 'superadmin';
+                document.getElementById('password').value = 'admin123';
+            }
+            // Ctrl + 2 = Admin
+            if (e.ctrlKey && e.key === '2') {
+                e.preventDefault();
+                document.getElementById('email_or_username').value = 'admin';
+                document.getElementById('password').value = 'admin123';
+            }
+            // Ctrl + 3 = Profesor
+            if (e.ctrlKey && e.key === '3') {
+                e.preventDefault();
+                document.getElementById('email_or_username').value = 'mgarcia';
+                document.getElementById('password').value = 'profesor123';
+            }
+        });
+    </script>
+</body>
+</html>

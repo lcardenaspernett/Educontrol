@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block title %}Mi Perfil - {{ super() }}{% endblock %}
+{% block page_title %}Mi Perfil{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="card">
+                <div class="card-header">
+                    <h4><i class="fas fa-user me-2"></i>Información del Perfil</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4 text-center">
+                            <div class="user-avatar-large mb-3">
+                                {% set initials = current_user.full_name.split()[0][0] ~ current_user.full_name.split()[-1][0] if current_user.full_name else current_user.email[0:2]|upper %}
+                                {{ initials }}
+                            </div>
+                            <h5>{{ current_user.full_name }}</h5>
+                            <p class="text-muted">{{ current_user.role.title() }}</p>
+                        </div>
+                        <div class="col-md-8">
+                            <div class="row mb-3">
+                                <div class="col-sm-3"><strong>Nombre completo:</strong></div>
+                                <div class="col-sm-9">{{ current_user.full_name }}</div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-sm-3"><strong>Email:</strong></div>
+                                <div class="col-sm-9">{{ current_user.email }}</div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-sm-3"><strong>Usuario:</strong></div>
+                                <div class="col-sm-9">{{ current_user.username or 'No definido' }}</div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-sm-3"><strong>Rol:</strong></div>
+                                <div class="col-sm-9">
+                                    <span class="badge bg-primary">{{ current_user.role.title() }}</span>
+                                </div>
+                            </div>
+                            {% if current_user.institution %}
+                            <div class="row mb-3">
+                                <div class="col-sm-3"><strong>Institución:</strong></div>
+                                <div class="col-sm-9">{{ current_user.institution.name }}</div>
+                            </div>
+                            {% endif %}
+                            <div class="row mb-3">
+                                <div class="col-sm-3"><strong>Último acceso:</strong></div>
+                                <div class="col-sm-9">
+                                    {{ current_user.last_login.strftime('%d/%m/%Y a las %H:%M') if current_user.last_login else 'Primera vez' }}
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-sm-3"><strong>Registrado:</strong></div>
+                                <div class="col-sm-9">{{ current_user.created_at.strftime('%d/%m/%Y') }}</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <hr>
+                    
+                    <div class="text-center">
+                        <button class="btn btn-primary me-2">
+                            <i class="fas fa-edit me-1"></i>
+                            Editar Perfil
+                        </button>
+                        <button class="btn btn-outline-secondary">
+                            <i class="fas fa-key me-1"></i>
+                            Cambiar Contraseña
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.user-avatar-large {
+    width: 120px;
+    height: 120px;
+    background: linear-gradient(135deg, #8E2DE2 0%, #4A00E0 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin: 0 auto;
+    box-shadow: 0 4px 15px rgba(142, 45, 226, 0.3);
+}
+</style>
+{% endblock %}

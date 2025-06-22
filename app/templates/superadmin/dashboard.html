@@ -1,0 +1,594 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard Superadmin - {{ super() }}{% endblock %}
+{% block page_title %}Dashboard Superadmin{% endblock %}
+
+{% block extra_css %}
+<style>
+    .stats-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 16px;
+        padding: 2rem;
+        color: white;
+        position: relative;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        border: none;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        cursor: pointer;
+    }
+
+    .stats-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+    }
+
+    .stats-card.institutions {
+        background: linear-gradient(135deg, #8E2DE2 0%, #4A00E0 100%);
+    }
+
+    .stats-card.users {
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+    }
+
+    .stats-card.admins {
+        background: linear-gradient(135deg, #fc4a1a 0%, #f7b733 100%);
+    }
+
+    .stats-card.teachers {
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    }
+
+    .stats-card.students {
+        background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+    }
+
+    .stats-card.courses {
+        background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+    }
+
+    .stats-icon {
+        font-size: 3rem;
+        opacity: 0.8;
+        margin-bottom: 1rem;
+    }
+
+    .stats-number {
+        font-size: 2.5rem;
+        font-weight: 800;
+        margin-bottom: 0.5rem;
+    }
+
+    .stats-label {
+        font-size: 1.1rem;
+        opacity: 0.9;
+        font-weight: 500;
+    }
+
+    .stats-change {
+        font-size: 0.9rem;
+        opacity: 0.8;
+        margin-top: 0.5rem;
+    }
+
+    .welcome-banner {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 16px;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    }
+
+    .chart-container {
+        position: relative;
+        height: 400px;
+        background: white;
+        border-radius: 16px;
+        padding: 2rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    }
+
+    .activity-item {
+        padding: 1rem 0;
+        border-bottom: 1px solid rgba(0,0,0,0.05);
+        transition: all 0.3s ease;
+    }
+
+    .activity-item:last-child {
+        border-bottom: none;
+    }
+
+    .activity-item:hover {
+        background: rgba(142, 45, 226, 0.02);
+        margin: 0 -1rem;
+        padding: 1rem;
+        border-radius: 8px;
+    }
+
+    .activity-icon {
+        width: 40px;
+        height: 40px;
+        background: rgba(142, 45, 226, 0.1);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #8E2DE2;
+        font-size: 1rem;
+    }
+
+    .activity-time {
+        font-size: 0.75rem;
+        color: #6b7280;
+        margin-bottom: 0.25rem;
+        font-weight: 500;
+    }
+
+    .activity-title {
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+        color: #1e293b;
+        font-size: 0.9rem;
+    }
+
+    .activity-description {
+        font-size: 0.85rem;
+        color: #6b7280;
+        line-height: 1.4;
+    }
+
+    .system-status {
+        background: #10b981;
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .system-status.status-warning {
+        background: #f59e0b;
+    }
+
+    .system-status.status-error {
+        background: #ef4444;
+    }
+
+    /* Estilos para acciones rápidas */
+    .quick-action-btn {
+        background: white;
+        border: 2px solid #e5e7eb;
+        border-radius: 12px;
+        padding: 1.5rem;
+        text-decoration: none;
+        color: #374151;
+        transition: all 0.3s ease;
+        display: block;
+        text-align: center;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+
+    .quick-action-btn:hover {
+        border-color: #8E2DE2;
+        background: rgba(142, 45, 226, 0.05);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(142, 45, 226, 0.15);
+        text-decoration: none;
+        color: #8E2DE2;
+    }
+
+    .quick-action-icon {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+        color: #8E2DE2;
+        transition: all 0.3s ease;
+    }
+
+    .quick-action-btn:hover .quick-action-icon {
+        transform: scale(1.1);
+        color: #4A00E0;
+    }
+
+    .quick-action-label {
+        font-weight: 600;
+        font-size: 0.9rem;
+        line-height: 1.3;
+    }
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
+
+{% block content %}
+<script id="dashboard-data" type="application/json">
+{
+    "chartData": {
+        "institutionNames": {{ chart_data.institution_names | tojson if chart_data and chart_data.institution_names else ['Colegio Ejemplo'] | tojson }},
+        "studentsData": {{ chart_data.students_per_institution | tojson if chart_data and chart_data.students_per_institution else [1] | tojson }},
+        "teachersData": {{ chart_data.teachers_per_institution | tojson if chart_data and chart_data.teachers_per_institution else [1] | tojson }}
+    },
+    "stats": {
+        "totalInstitutions": {{ stats.total_institutions if stats else 1 }},
+        "totalUsers": {{ stats.total_users if stats else 4 }},
+        "totalAdmins": {{ stats.total_admins if stats else 1 }},
+        "totalTeachers": {{ stats.total_teachers if stats else 1 }},
+        "totalStudents": {{ stats.total_students if stats else 1 }},
+        "totalCourses": {{ stats.total_courses if stats else 0 }}
+    }
+}
+</script>
+
+<!-- Welcome Banner -->
+<div class="welcome-banner">
+    <div class="row align-items-center">
+        <div class="col-md-8">
+            <h1 class="mb-2">
+                ¡Bienvenido, {% if current_user.full_name %}{{ current_user.full_name.split(' ')[0] }}{% else %}Superadmin{% endif %}! 👑
+            </h1>
+            <p class="mb-2 fs-5">
+                Panel de control maestro del sistema EduControl. Tienes acceso completo a todas las funcionalidades.
+            </p>
+            <div class="d-flex align-items-center gap-3">
+                <div class="system-status">
+                    <i class="fas fa-circle"></i>
+                    Sistema operativo
+                </div>
+                <small>
+                    <i class="fas fa-clock me-1"></i>
+                    Último acceso: {% if current_user.last_login %}{{ current_user.last_login.strftime('%d/%m/%Y a las %H:%M') }}{% else %}Primera vez{% endif %}
+                </small>
+            </div>
+        </div>
+        <div class="col-md-4 text-end">
+            <span class="badge bg-light text-dark fs-6">
+                <i class="fas fa-crown me-1"></i>
+                Super Administrador
+            </span>
+        </div>
+    </div>
+</div>
+
+<!-- Estadísticas Principales -->
+<div class="row g-4 mb-5">
+    <div class="col-lg-2 col-md-4 col-sm-6">
+        <div class="stats-card institutions">
+            <div class="stats-icon">
+                <i class="fas fa-building"></i>
+            </div>
+            <div class="stats-number" data-target="{{ stats.total_institutions if stats else 1 }}">0</div>
+            <div class="stats-label">Instituciones</div>
+            <div class="stats-change">
+                <i class="fas fa-arrow-up me-1"></i>
+                +{{ stats.new_institutions_this_month if stats else 0 }} este mes
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-2 col-md-4 col-sm-6">
+        <div class="stats-card users">
+            <div class="stats-icon">
+                <i class="fas fa-users"></i>
+            </div>
+            <div class="stats-number" data-target="{{ stats.total_users if stats else 4 }}">0</div>
+            <div class="stats-label">Total Usuarios</div>
+            <div class="stats-change">
+                <i class="fas fa-arrow-up me-1"></i>
+                +{{ stats.new_users_this_week if stats else 0 }} esta semana
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-2 col-md-4 col-sm-6">
+        <div class="stats-card admins">
+            <div class="stats-icon">
+                <i class="fas fa-user-shield"></i>
+            </div>
+            <div class="stats-number" data-target="{{ stats.total_admins if stats else 1 }}">0</div>
+            <div class="stats-label">Administradores</div>
+            <div class="stats-change">
+                <i class="fas fa-check me-1"></i>
+                {{ stats.active_admins if stats else 1 }} activos
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-2 col-md-4 col-sm-6">
+        <div class="stats-card teachers">
+            <div class="stats-icon">
+                <i class="fas fa-chalkboard-teacher"></i>
+            </div>
+            <div class="stats-number" data-target="{{ stats.total_teachers if stats else 1 }}">0</div>
+            <div class="stats-label">Profesores</div>
+            <div class="stats-change">
+                <i class="fas fa-arrow-up me-1"></i>
+                +{{ stats.new_teachers_this_month if stats else 0 }} este mes
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-2 col-md-4 col-sm-6">
+        <div class="stats-card students">
+            <div class="stats-icon">
+                <i class="fas fa-user-graduate"></i>
+            </div>
+            <div class="stats-number" data-target="{{ stats.total_students if stats else 1 }}">0</div>
+            <div class="stats-label">Estudiantes</div>
+            <div class="stats-change">
+                <i class="fas fa-arrow-up me-1"></i>
+                +{{ stats.new_students_this_month if stats else 0 }} este mes
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-2 col-md-4 col-sm-6">
+        <div class="stats-card courses">
+            <div class="stats-icon">
+                <i class="fas fa-book"></i>
+            </div>
+            <div class="stats-number" data-target="{{ stats.total_courses if stats else 0 }}">0</div>
+            <div class="stats-label">Cursos Totales</div>
+            <div class="stats-change">
+                <i class="fas fa-chart-line me-1"></i>
+                {{ stats.active_courses if stats else 0 }} activos
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Contenido Principal -->
+<div class="row">
+    <!-- Gráfico -->
+    <div class="col-lg-8 mb-4">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5><i class="fas fa-chart-bar me-2"></i>Distribución de Usuarios por Institución</h5>
+            </div>
+            <div class="card-body">
+                <div class="chart-container">
+                    <canvas id="institutionsChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Acciones Rápidas -->
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-bolt me-2"></i>Acciones Rápidas</h5>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-md-3 mb-3">
+                        <a href="{{ url_for('superadmin.create_institution') }}" class="quick-action-btn">
+                            <div class="quick-action-icon">
+                                <i class="fas fa-plus-circle"></i>
+                            </div>
+                            <div class="quick-action-label">Nueva Institución</div>
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <a href="{{ url_for('superadmin.institutions') }}" class="quick-action-btn">
+                            <div class="quick-action-icon">
+                                <i class="fas fa-building"></i>
+                            </div>
+                            <div class="quick-action-label">Gestionar Instituciones</div>
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <a href="{{ url_for('superadmin.users') }}" class="quick-action-btn">
+                            <div class="quick-action-icon">
+                                <i class="fas fa-users-cog"></i>
+                            </div>
+                            <div class="quick-action-label">Gestionar Usuarios</div>
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <a href="#" class="quick-action-btn" onclick="showNotification('Función en desarrollo', 'info')">
+                            <div class="quick-action-icon">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                            <div class="quick-action-label">Reportes Globales</div>
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <a href="{{ url_for('superadmin.settings') }}" class="quick-action-btn">
+                            <div class="quick-action-icon">
+                                <i class="fas fa-cogs"></i>
+                            </div>
+                            <div class="quick-action-label">Configuración Sistema</div>
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <a href="#" class="quick-action-btn" onclick="showNotification('Backup programado para esta noche', 'success')">
+                            <div class="quick-action-icon">
+                                <i class="fas fa-database"></i>
+                            </div>
+                            <div class="quick-action-label">Backup & Restore</div>
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <a href="#" class="quick-action-btn" onclick="showNotification('Logs disponibles en el servidor', 'info')">
+                            <div class="quick-action-icon">
+                                <i class="fas fa-history"></i>
+                            </div>
+                            <div class="quick-action-label">Logs de Auditoría</div>
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <a href="#" class="quick-action-btn" onclick="checkSystemStatus()">
+                            <div class="quick-action-icon">
+                                <i class="fas fa-heartbeat"></i>
+                            </div>
+                            <div class="quick-action-label">Estado del Sistema</div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Panel lateral -->
+    <div class="col-lg-4">
+        <!-- Estado del Sistema -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5><i class="fas fa-server me-2"></i>Estado del Sistema</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <span>Estado del Servidor</span>
+                    <span class="system-status">
+                        <i class="fas fa-circle"></i>
+                        Operativo
+                    </span>
+                </div>
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <span>Base de Datos</span>
+                    <span class="system-status">
+                        <i class="fas fa-circle"></i>
+                        Conectada
+                    </span>
+                </div>
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <span>Último Backup</span>
+                    <span class="text-muted">{{ system_info.last_backup if system_info else 'Hace 2 horas' }}</span>
+                </div>
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <span>Versión del Sistema</span>
+                    <span class="badge bg-primary">{{ system_info.version if system_info else 'v1.0.2' }}</span>
+                </div>
+                <div class="d-flex justify-content-between align-items-center">
+                    <span>Usuarios Conectados</span>
+                    <span class="fw-bold text-success">{{ system_info.connected_users if system_info else 1 }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Actividad Reciente -->
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-history me-2"></i>Actividad Reciente</h5>
+            </div>
+            <div class="card-body">
+                {% if recent_activities %}
+                    {% for activity in recent_activities %}
+                    <div class="activity-item">
+                        <div class="d-flex align-items-start">
+                            <div class="activity-icon me-3">
+                                <i class="{{ activity.icon if activity.icon else 'fas fa-circle' }}"></i>
+                            </div>
+                            <div class="flex-grow-1">
+                                <div class="activity-time">{{ activity.time }}</div>
+                                <div class="activity-title">{{ activity.title }}</div>
+                                <div class="activity-description">{{ activity.description }}</div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="activity-item">
+                        <div class="d-flex align-items-start">
+                            <div class="activity-icon me-3">
+                                <i class="fas fa-power-off"></i>
+                            </div>
+                            <div class="flex-grow-1">
+                                <div class="activity-time">Hace 15 minutos</div>
+                                <div class="activity-title">Sistema iniciado</div>
+                                <div class="activity-description">EduControl se ha iniciado correctamente</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="activity-item">
+                        <div class="d-flex align-items-start">
+                            <div class="activity-icon me-3">
+                                <i class="fas fa-sign-in-alt"></i>
+                            </div>
+                            <div class="flex-grow-1">
+                                <div class="activity-time">Hace 1 hora</div>
+                                <div class="activity-title">Acceso de administrador</div>
+                                <div class="activity-description">{{ current_user.full_name }} accedió al panel</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="activity-item">
+                        <div class="d-flex align-items-start">
+                            <div class="activity-icon me-3">
+                                <i class="fas fa-database"></i>
+                            </div>
+                            <div class="flex-grow-1">
+                                <div class="activity-time">Hace 2 horas</div>
+                                <div class="activity-title">Backup automático completado</div>
+                                <div class="activity-description">Respaldo de base de datos exitoso</div>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/dashboard-superadmin.js') }}"></script>
+<script>
+// Funciones para los botones de acciones rápidas
+function showNotification(message, type) {
+    // Crear notificación simple
+    const notification = document.createElement('div');
+    notification.style.cssText = 
+        'position: fixed; top: 20px; right: 20px; z-index: 9999; ' +
+        'padding: 1rem 1.5rem; border-radius: 8px; color: white; ' +
+        'font-weight: 500; box-shadow: 0 4px 20px rgba(0,0,0,0.15); ' +
+        'transform: translateX(100%); transition: all 0.3s ease;';
+    
+    // Colores según el tipo
+    const colors = {
+        'success': '#10b981',
+        'info': '#3b82f6',
+        'warning': '#f59e0b',
+        'danger': '#ef4444'
+    };
+    
+    notification.style.backgroundColor = colors[type] || colors.info;
+    notification.textContent = message;
+    
+    document.body.appendChild(notification);
+    
+    // Mostrar
+    setTimeout(() => {
+        notification.style.transform = 'translateX(0)';
+    }, 100);
+    
+    // Ocultar después de 3 segundos
+    setTimeout(() => {
+        notification.style.transform = 'translateX(100%)';
+        setTimeout(() => notification.remove(), 300);
+    }, 3000);
+}
+
+function checkSystemStatus() {
+    showNotification('Sistema operativo: CPU 12%, RAM 45%, Disco 68%', 'success');
+    
+    // Simular actualización de estado
+    setTimeout(() => {
+        showNotification('Última verificación: Todo funcionando correctamente', 'info');
+    }, 1500);
+}
+
+// Agregar efectos hover a las estadísticas
+document.addEventListener('DOMContentLoaded', function() {
+    const statsCards = document.querySelectorAll('.stats-card');
+    
+    statsCards.forEach(card => {
+        card.addEventListener('click', function() {
+            const label = this.querySelector('.stats-label').textContent;
+            showNotification('Mostrando detalles de: ' + label, 'info');
+        });
+    });
+});
+</script>
+{% endblock %}

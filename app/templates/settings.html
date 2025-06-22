@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block title %}Configuración - {{ super() }}{% endblock %}
+{% block page_title %}Configuración{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="card">
+                <div class="card-header">
+                    <h4><i class="fas fa-cog me-2"></i>Configuración de Cuenta</h4>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Esta sección está en desarrollo. Próximamente podrás personalizar tu experiencia en EduControl.
+                    </div>
+                    
+                    <h5>Preferencias Generales</h5>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="notifications" checked>
+                                <label class="form-check-label" for="notifications">
+                                    Recibir notificaciones por email
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="darkMode">
+                                <label class="form-check-label" for="darkMode">
+                                    Modo oscuro (próximamente)
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <hr>
+                    
+                    <h5>Zona Horaria</h5>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <select class="form-select">
+                                <option selected>Colombia (UTC-5)</option>
+                                <option>México (UTC-6)</option>
+                                <option>Argentina (UTC-3)</option>
+                                <option>España (UTC+1)</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <hr>
+                    
+                    <div class="text-center">
+                        <button class="btn btn-primary me-2">
+                            <i class="fas fa-save me-1"></i>
+                            Guardar Cambios
+                        </button>
+                        <a href="{{ url_for('main.dashboard') }}" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-1"></i>
+                            Volver al Dashboard
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

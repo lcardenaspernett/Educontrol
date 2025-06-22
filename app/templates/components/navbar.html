@@ -1,0 +1,31 @@
+<nav class="navbar-custom">
+    <div class="d-flex align-items-center">
+        <button class="sidebar-toggle d-lg-none me-3" id="sidebarToggleMobile" title="Abrir menú">
+            <i class="fas fa-bars"></i>
+        </button>
+        <span class="navbar-brand">{% block page_title %}Dashboard{% endblock %}</span>
+    </div>
+
+    {% if current_user.is_authenticated %}
+    <div class="navbar-nav">
+        <div class="dropdown">
+            <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" data-bs-toggle="dropdown" aria-expanded="false">
+                <div class="user-avatar">
+                    {% set initials = current_user.full_name.split()[0][0] ~ current_user.full_name.split()[-1][0] if current_user.full_name else current_user.email[0:2]|upper %}
+                    {{ initials }}
+                </div>
+                <div class="d-none d-sm-block">
+                    <div class="fw-semibold">{{ current_user.full_name or current_user.email }}</div>
+                    <small class="text-muted">{{ current_user.role.title() }}</small>
+                </div>
+            </a>
+            <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="{{ url_for('main.profile') }}"><i class="fas fa-user me-2"></i>Mi Perfil</a></li>
+                <li><a class="dropdown-item" href="{{ url_for('main.settings') }}"><i class="fas fa-cog me-2"></i>Configuración</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item" href="{{ url_for('auth.logout') }}"><i class="fas fa-sign-out-alt me-2"></i>Cerrar Sesión</a></li>
+            </ul>
+        </div>
+    </div>
+    {% endif %}
+</nav>
