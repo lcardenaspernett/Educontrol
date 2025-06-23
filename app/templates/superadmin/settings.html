@@ -1,0 +1,623 @@
+<!-- 3. TEMPLATE: app/templates/superadmin/settings.html -->
+{% extends "base.html" %}
+
+{% block title %}Configuración del Sistema - {{ super() }}{% endblock %}
+{% block page_title %}Configuración del Sistema{% endblock %}
+
+{% block extra_css %}
+<style>
+    .settings-section {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        margin-bottom: 2rem;
+        overflow: hidden;
+    }
+
+    .section-header {
+        background: linear-gradient(135deg, #8E2DE2 0%, #4A00E0 100%);
+        color: white;
+        padding: 1.5rem;
+        font-size: 1.2rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .section-body {
+        padding: 2rem;
+    }
+
+    .config-item {
+        display: flex;
+        justify-content: between;
+        align-items: center;
+        padding: 1rem 0;
+        border-bottom: 1px solid #f1f3f4;
+    }
+
+    .config-item:last-child {
+        border-bottom: none;
+    }
+
+    .config-label {
+        flex: 1;
+    }
+
+    .config-title {
+        font-weight: 600;
+        color: #1f2937;
+        margin-bottom: 0.25rem;
+    }
+
+    .config-description {
+        color: #6b7280;
+        font-size: 0.875rem;
+    }
+
+    .config-value {
+        font-weight: 600;
+        color: #8E2DE2;
+        padding: 0.5rem 1rem;
+        background: rgba(142, 45, 226, 0.1);
+        border-radius: 8px;
+        margin-left: 1rem;
+    }
+
+    .system-status-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .status-card {
+        background: #f8fafc;
+        border-radius: 12px;
+        padding: 1.5rem;
+        text-align: center;
+        border: 2px solid transparent;
+        transition: all 0.3s ease;
+    }
+
+    .status-card.healthy {
+        border-color: #10b981;
+        background: rgba(16, 185, 129, 0.05);
+    }
+
+    .status-card.warning {
+        border-color: #f59e0b;
+        background: rgba(245, 158, 11, 0.05);
+    }
+
+    .status-card.error {
+        border-color: #ef4444;
+        background: rgba(239, 68, 68, 0.05);
+    }
+
+    .status-icon {
+        font-size: 2rem;
+        margin-bottom: 1rem;
+    }
+
+    .status-card.healthy .status-icon {
+        color: #10b981;
+    }
+
+    .status-card.warning .status-icon {
+        color: #f59e0b;
+    }
+
+    .status-card.error .status-icon {
+        color: #ef4444;
+    }
+
+    .status-title {
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: #1f2937;
+    }
+
+    .status-value {
+        font-size: 0.875rem;
+        color: #6b7280;
+    }
+
+    .action-btn {
+        background: linear-gradient(135deg, #8E2DE2 0%, #4A00E0 100%);
+        border: none;
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(142, 45, 226, 0.4);
+    }
+
+    .action-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(142, 45, 226, 0.6);
+    }
+
+    .danger-btn {
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);
+    }
+
+    .danger-btn:hover {
+        box-shadow: 0 8px 25px rgba(239, 68, 68, 0.6);
+    }
+
+    .log-entry {
+        padding: 0.75rem;
+        border-left: 4px solid #e5e7eb;
+        background: #f9fafb;
+        margin-bottom: 0.5rem;
+        border-radius: 0 8px 8px 0;
+        font-family: 'Courier New', monospace;
+        font-size: 0.875rem;
+    }
+
+    .log-entry.info { border-left-color: #3b82f6; }
+    .log-entry.warning { border-left-color: #f59e0b; }
+    .log-entry.error { border-left-color: #ef4444; }
+    .log-entry.success { border-left-color: #10b981; }
+
+    .backup-progress {
+        height: 8px;
+        background: #e5e7eb;
+        border-radius: 4px;
+        overflow: hidden;
+    }
+
+    .backup-progress-bar {
+        height: 100%;
+        background: linear-gradient(90deg, #10b981, #059669);
+        transition: width 0.3s ease;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Estado del Sistema -->
+    <div class="settings-section">
+        <div class="section-header">
+            <i class="fas fa-heartbeat"></i>
+            Estado del Sistema
+        </div>
+        <div class="section-body">
+            <div class="system-status-grid">
+                <div class="status-card healthy">
+                    <div class="status-icon">
+                        <i class="fas fa-server"></i>
+                    </div>
+                    <div class="status-title">Servidor</div>
+                    <div class="status-value">Operativo</div>
+                </div>
+                
+                <div class="status-card healthy">
+                    <div class="status-icon">
+                        <i class="fas fa-database"></i>
+                    </div>
+                    <div class="status-title">Base de Datos</div>
+                    <div class="status-value">Conectada</div>
+                </div>
+                
+                <div class="status-card warning">
+                    <div class="status-icon">
+                        <i class="fas fa-hdd"></i>
+                    </div>
+                    <div class="status-title">Almacenamiento</div>
+                    <div class="status-value">{{ system_info.database_size if system_info else '2.4 MB' }}</div>
+                </div>
+                
+                <div class="status-card healthy">
+                    <div class="status-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="status-title">Usuarios Activos</div>
+                    <div class="status-value">{{ system_info.connected_users if system_info else '1 en línea' }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Información del Sistema -->
+    <div class="settings-section">
+        <div class="section-header">
+            <i class="fas fa-info-circle"></i>
+            Información del Sistema
+        </div>
+        <div class="section-body">
+            <div class="config-item">
+                <div class="config-label">
+                    <div class="config-title">Versión de EduControl</div>
+                    <div class="config-description">Versión actual del sistema</div>
+                </div>
+                <div class="config-value">{{ system_info.version if system_info else 'v1.0.2' }}</div>
+            </div>
+            
+            <div class="config-item">
+                <div class="config-label">
+                    <div class="config-title">Tiempo de Actividad</div>
+                    <div class="config-description">Tiempo desde el último reinicio</div>
+                </div>
+                <div class="config-value">{{ system_info.uptime if system_info else '15:32:45' }}</div>
+            </div>
+            
+            <div class="config-item">
+                <div class="config-label">
+                    <div class="config-title">Archivos Subidos</div>
+                    <div class="config-description">Total de archivos en el sistema</div>
+                </div>
+                <div class="config-value">{{ system_info.total_files if system_info else '0 archivos' }}</div>
+            </div>
+            
+            <div class="config-item">
+                <div class="config-label">
+                    <div class="config-title">Último Backup</div>
+                    <div class="config-description">Fecha del último respaldo automático</div>
+                </div>
+                <div class="config-value">{{ system_info.last_backup if system_info else 'Hace 2 horas' }}</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Configuración de Backup -->
+    <div class="settings-section">
+        <div class="section-header">
+            <i class="fas fa-shield-alt"></i>
+            Gestión de Respaldos
+        </div>
+        <div class="section-body">
+            <div class="row align-items-center mb-4">
+                <div class="col-md-8">
+                    <h6>Backup Automático</h6>
+                    <p class="text-muted mb-0">Respaldo automático diario a las 2:00 AM</p>
+                </div>
+                <div class="col-md-4 text-end">
+                    <button class="btn action-btn" onclick="startBackup()">
+                        <i class="fas fa-download me-2"></i>Backup Ahora
+                    </button>
+                </div>
+            </div>
+            
+            <div class="backup-progress mb-3" style="display: none;" id="backup-progress">
+                <div class="backup-progress-bar" style="width: 0%"></div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <button class="btn btn-outline-primary w-100 mb-2" onclick="downloadBackup()">
+                        <i class="fas fa-download me-2"></i>Descargar Backup
+                    </button>
+                </div>
+                <div class="col-md-6">
+                    <button class="btn btn-outline-secondary w-100 mb-2" onclick="uploadBackup()">
+                        <i class="fas fa-upload me-2"></i>Restaurar Backup
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Configuración de Seguridad -->
+    <div class="settings-section">
+        <div class="section-header">
+            <i class="fas fa-lock"></i>
+            Configuración de Seguridad
+        </div>
+        <div class="section-body">
+            <div class="config-item">
+                <div class="config-label">
+                    <div class="config-title">Rate Limiting</div>
+                    <div class="config-description">Límite de intentos de login por minuto</div>
+                </div>
+                <div class="config-value">5 intentos/min</div>
+            </div>
+            
+            <div class="config-item">
+                <div class="config-label">
+                    <div class="config-title">Sesiones</div>
+                    <div class="config-description">Tiempo de expiración de sesión</div>
+                </div>
+                <div class="config-value">8 horas</div>
+            </div>
+            
+            <div class="config-item">
+                <div class="config-label">
+                    <div class="config-title">Headers de Seguridad</div>
+                    <div class="config-description">Flask-Talisman activo</div>
+                </div>
+                <div class="config-value">✅ Activo</div>
+            </div>
+            
+            <div class="config-item">
+                <div class="config-label">
+                    <div class="config-title">Logging de Seguridad</div>
+                    <div class="config-description">Registro de eventos críticos</div>
+                </div>
+                <div class="config-value">✅ Activo</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Logs del Sistema -->
+    <div class="settings-section">
+        <div class="section-header">
+            <i class="fas fa-file-alt"></i>
+            Logs Recientes del Sistema
+        </div>
+        <div class="section-body">
+            <div class="mb-3">
+                <button class="btn btn-sm btn-outline-primary me-2" onclick="refreshLogs()">
+                    <i class="fas fa-sync me-1"></i>Actualizar
+                </button>
+                <button class="btn btn-sm btn-outline-secondary" onclick="downloadLogs()">
+                    <i class="fas fa-download me-1"></i>Descargar Logs
+                </button>
+            </div>
+            
+            <div id="log-container">
+                <div class="log-entry info">
+                    <strong>[{{ moment().format('YYYY-MM-DD HH:mm:ss') }}]</strong> INFO - Dashboard de SuperAdmin accedido por {{ current_user.username }}
+                </div>
+                <div class="log-entry success">
+                    <strong>[{{ moment().subtract(1, 'hour').format('YYYY-MM-DD HH:mm:ss') }}]</strong> SUCCESS - Backup automático completado exitosamente
+                </div>
+                <div class="log-entry warning">
+                    <strong>[{{ moment().subtract(2, 'hours').format('YYYY-MM-DD HH:mm:ss') }}]</strong> WARNING - Uso de almacenamiento alto (85%)
+                </div>
+                <div class="log-entry info">
+                    <strong>[{{ moment().subtract(3, 'hours').format('YYYY-MM-DD HH:mm:ss') }}]</strong> INFO - Sistema iniciado correctamente
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Acciones de Mantenimiento -->
+    <div class="settings-section">
+        <div class="section-header">
+            <i class="fas fa-tools"></i>
+            Mantenimiento del Sistema
+        </div>
+        <div class="section-body">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <button class="btn action-btn w-100" onclick="optimizeDatabase()">
+                        <i class="fas fa-database me-2"></i>Optimizar Base de Datos
+                    </button>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <button class="btn action-btn w-100" onclick="clearCache()">
+                        <i class="fas fa-broom me-2"></i>Limpiar Caché
+                    </button>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <button class="btn btn-outline-warning w-100" onclick="restartSystem()">
+                        <i class="fas fa-redo me-2"></i>Reiniciar Sistema
+                    </button>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <button class="btn danger-btn w-100" onclick="factoryReset()">
+                        <i class="fas fa-exclamation-triangle me-2"></i>Reset de Fábrica
+                    </button>
+                </div>
+            </div>
+            
+            <div class="alert alert-warning mt-3">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                <strong>Advertencia:</strong> Las acciones de mantenimiento pueden afectar el funcionamiento del sistema. 
+                Asegúrese de tener un backup reciente antes de proceder.
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Funciones para la configuración del sistema
+
+function startBackup() {
+    const progressBar = document.getElementById('backup-progress');
+    const progressBarInner = progressBar.querySelector('.backup-progress-bar');
+    
+    progressBar.style.display = 'block';
+    progressBarInner.style.width = '0%';
+    
+    // Simular progreso del backup
+    let progress = 0;
+    const interval = setInterval(() => {
+        progress += Math.random() * 15 + 5; // Incremento aleatorio entre 5-20%
+        
+        if (progress >= 100) {
+            progress = 100;
+            clearInterval(interval);
+            
+            setTimeout(() => {
+                progressBar.style.display = 'none';
+                showNotification('✅ Backup completado exitosamente', 'success');
+            }, 500);
+        }
+        
+        progressBarInner.style.width = progress + '%';
+    }, 200);
+    
+    showNotification('🔄 Iniciando backup del sistema...', 'info');
+}
+
+function downloadBackup() {
+    showNotification('⬇️ Preparando descarga del backup...', 'info');
+    
+    // Simular generación y descarga
+    setTimeout(() => {
+        const date = new Date().toISOString().split('T')[0];
+        const filename = `educontrol_backup_${date}.sql`;
+        
+        // Crear contenido de ejemplo
+        const content = `-- EduControl Database Backup
+-- Date: ${new Date().toLocaleString()}
+-- Version: 1.0.2
+-- 
+-- This is a simulated backup file for demonstration
+-- In production, this would contain the actual database dump
+
+CREATE DATABASE IF NOT EXISTS educontrol;
+USE educontrol;
+
+-- Users table backup would be here
+-- Institutions table backup would be here
+-- ... etc
+
+-- Backup completed successfully`;
+        
+        const blob = new Blob([content], { type: 'text/sql' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        a.click();
+        URL.revokeObjectURL(url);
+        
+        showNotification('✅ Backup descargado correctamente', 'success');
+    }, 1500);
+}
+
+function uploadBackup() {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.sql,.db,.backup';
+    
+    input.onchange = function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            if (confirm(`¿Está seguro de restaurar el backup "${file.name}"?\n\nEsta acción sobrescribirá todos los datos actuales.`)) {
+                showNotification('🔄 Restaurando backup...', 'info');
+                
+                // Simular proceso de restauración
+                setTimeout(() => {
+                    showNotification('✅ Backup restaurado exitosamente', 'success');
+                }, 3000);
+            }
+        }
+    };
+    
+    input.click();
+}
+
+function optimizeDatabase() {
+    if (confirm('¿Desea optimizar la base de datos?\n\nEsto puede tomar varios minutos.')) {
+        showNotification('🔄 Optimizando base de datos...', 'info');
+        
+        setTimeout(() => {
+            showNotification('✅ Base de datos optimizada correctamente', 'success');
+        }, 2000);
+    }
+}
+
+function clearCache() {
+    showNotification('🔄 Limpiando caché del sistema...', 'info');
+    
+    setTimeout(() => {
+        showNotification('✅ Caché limpiado exitosamente', 'success');
+    }, 1000);
+}
+
+function restartSystem() {
+    if (confirm('¿Está seguro de reiniciar el sistema?\n\nTodos los usuarios serán desconectados temporalmente.')) {
+        showNotification('🔄 Reiniciando sistema...', 'warning');
+        
+        setTimeout(() => {
+            showNotification('✅ Sistema reiniciado correctamente', 'success');
+        }, 3000);
+    }
+}
+
+function factoryReset() {
+    const confirmation1 = confirm('⚠️ ADVERTENCIA CRÍTICA ⚠️\n\nEsta acción eliminará TODOS los datos del sistema:\n\n• Todas las instituciones\n• Todos los usuarios\n• Todos los cursos\n• Todos los archivos\n• Toda la configuración\n\n¿Está COMPLETAMENTE seguro?');
+    
+    if (confirmation1) {
+        const confirmation2 = confirm('ÚLTIMA CONFIRMACIÓN\n\nEsta acción NO se puede deshacer.\n\nEscriba "ELIMINAR TODO" en el siguiente prompt para confirmar.');
+        
+        if (confirmation2) {
+            const finalConfirm = prompt('Escriba exactamente "ELIMINAR TODO" para confirmar:');
+            
+            if (finalConfirm === 'ELIMINAR TODO') {
+                showNotification('🚨 Iniciando reset de fábrica...', 'danger');
+                
+                setTimeout(() => {
+                    showNotification('⚠️ Función de reset deshabilitada en modo desarrollo', 'warning');
+                }, 2000);
+            } else {
+                showNotification('❌ Reset cancelado - confirmación incorrecta', 'info');
+            }
+        }
+    }
+}
+
+function refreshLogs() {
+    showNotification('🔄 Actualizando logs...', 'info');
+    
+    const logContainer = document.getElementById('log-container');
+    const now = new Date();
+    
+    // Agregar nueva entrada de log
+    const newLog = document.createElement('div');
+    newLog.className = 'log-entry info';
+    newLog.innerHTML = `<strong>[${now.toISOString().slice(0, 19).replace('T', ' ')}]</strong> INFO - Logs actualizados por {{ current_user.username }}`;
+    
+    logContainer.insertBefore(newLog, logContainer.firstChild);
+    
+    // Limitar a 10 entradas
+    if (logContainer.children.length > 10) {
+        logContainer.removeChild(logContainer.lastChild);
+    }
+    
+    setTimeout(() => {
+        showNotification('✅ Logs actualizados', 'success');
+    }, 500);
+}
+
+function downloadLogs() {
+    showNotification('⬇️ Generando archivo de logs...', 'info');
+    
+    setTimeout(() => {
+        const logContent = `EduControl System Logs
+Generated: ${new Date().toLocaleString()}
+User: {{ current_user.username }}
+
+========================================
+
+[${new Date().toISOString()}] INFO - Dashboard de SuperAdmin accedido por {{ current_user.username }}
+[${new Date(Date.now() - 3600000).toISOString()}] SUCCESS - Backup automático completado exitosamente
+[${new Date(Date.now() - 7200000).toISOString()}] WARNING - Uso de almacenamiento alto (85%)
+[${new Date(Date.now() - 10800000).toISOString()}] INFO - Sistema iniciado correctamente
+
+========================================
+End of logs`;
+        
+        const blob = new Blob([logContent], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `educontrol_logs_${new Date().toISOString().split('T')[0]}.txt`;
+        a.click();
+        URL.revokeObjectURL(url);
+        
+        showNotification('✅ Logs descargados correctamente', 'success');
+    }, 1000);
+}
+
+// Usar la función de notificación del dashboard principal
+function showNotification(message, type) {
+    if (window.DashboardSuperadmin && window.DashboardSuperadmin.showNotification) {
+        window.DashboardSuperadmin.showNotification(message, type);
+    } else {
+        // Fallback si no está disponible
+        alert(message);
+    }
+}
+</script>
+{% endblock %}

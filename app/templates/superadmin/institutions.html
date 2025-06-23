@@ -1,0 +1,507 @@
+{% extends "base.html" %}
+
+{% block title %}Gestión de Instituciones - {{ super() }}{% endblock %}
+{% block page_title %}Gestión de Instituciones{% endblock %}
+
+{% block extra_css %}
+<style>
+    .institution-card {
+        border: none;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        transition: all 0.3s ease;
+        overflow: hidden;
+    }
+
+    .institution-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+    }
+
+    .institution-header {
+        background: linear-gradient(135deg, #8E2DE2 0%, #4A00E0 100%);
+        color: white;
+        padding: 1.5rem;
+        position: relative;
+    }
+
+    .institution-logo {
+        width: 60px;
+        height: 60px;
+        background: rgba(255,255,255,0.2);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        font-weight: bold;
+        margin-bottom: 1rem;
+    }
+
+    .institution-stats {
+        display: flex;
+        justify-content: space-around;
+        background: #f8fafc;
+        padding: 1rem;
+        margin: 0 -1.5rem -1.5rem -1.5rem;
+    }
+
+    .stat-item {
+        text-align: center;
+    }
+
+    .stat-number {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #8E2DE2;
+    }
+
+    .stat-label {
+        font-size: 0.75rem;
+        color: #6b7280;
+        text-transform: uppercase;
+        font-weight: 600;
+    }
+
+    .status-badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+    }
+
+    .status-active { background: #10b981; color: white; }
+    .status-inactive { background: #ef4444; color: white; }
+    .status-pending { background: #f59e0b; color: white; }
+
+    .action-btn {
+        border: none;
+        background: none;
+        color: #6b7280;
+        padding: 0.5rem;
+        border-radius: 6px;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+
+    .action-btn:hover {
+        background: #f3f4f6;
+        color: #8E2DE2;
+    }
+
+    .add-institution-card {
+        border: 2px dashed #d1d5db;
+        border-radius: 16px;
+        background: #f9fafb;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 300px;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        text-decoration: none;
+        color: #6b7280;
+    }
+
+    .add-institution-card:hover {
+        border-color: #8E2DE2;
+        background: rgba(142, 45, 226, 0.05);
+        color: #8E2DE2;
+        transform: translateY(-2px);
+    }
+
+    .add-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+    }
+
+    .filters-bar {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        margin-bottom: 2rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Barra de filtros y acciones -->
+    <div class="filters-bar">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <form method="GET" class="row g-3">
+                    <div class="col-md-5">
+                        <input type="text" name="search" class="form-control" 
+                               placeholder="Buscar institución..." 
+                               value="{{ search or '' }}">
+                    </div>
+                    <div class="col-md-3">
+                        <select name="status" class="form-select">
+                            <option value="">Todos los estados</option>
+                            <option value="active" {% if status_filter == 'active' %}selected{% endif %}>Activas</option>
+                            <option value="inactive" {% if status_filter == 'inactive' %}selected{% endif %}>Inactivas</option>
+                            <option value="pending" {% if status_filter == 'pending' %}selected{% endif %}>Pendientes</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <select name="type" class="form-select">
+                            <option value="">Todos los tipos</option>
+                            <option value="colegio">Colegio</option>
+                            <option value="universidad">Universidad</option>
+                            <option value="instituto">Instituto</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+            <div class="col-md-4 text-end">
+                <a href="{{ url_for('superadmin.create_institution') }}" class="btn btn-primary">
+                    <i class="fas fa-plus me-2"></i>Nueva Institución
+                </a>
+                <button class="btn btn-outline-secondary ms-2" onclick="exportInstitutions()">
+                    <i class="fas fa-download me-2"></i>Exportar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Grid de instituciones -->
+    <div class="row">
+        <!-- Tarjeta para agregar nueva institución -->
+        <div class="col-lg-4 col-md-6 mb-4">
+            <a href="{{ url_for('superadmin.create_institution') }}" class="add-institution-card">
+                <div class="text-center">
+                    <div class="add-icon">
+                        <i class="fas fa-plus-circle"></i>
+                    </div>
+                    <h5>Agregar Nueva Institución</h5>
+                    <p class="mb-0">Crear una nueva institución educativa</p>
+                </div>
+            </a>
+        </div>
+
+        <!-- Tarjetas de instituciones existentes -->
+        {% if institutions and institutions.items %}
+            {% for institution in institutions.items %}
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="institution-card card h-100">
+                    <div class="institution-header">
+                        <span class="status-badge status-{{ institution.status or 'active' }}">
+                            {{ (institution.status or 'active').title() }}
+                        </span>
+                        <div class="institution-logo">
+                            {{ institution.name[0] if institution.name else 'I' }}
+                        </div>
+                        <h5 class="mb-1">{{ institution.name }}</h5>
+                        <p class="mb-0 opacity-75">{{ institution.code }}</p>
+                    </div>
+                    
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <small class="text-muted d-block">Tipo</small>
+                            <strong>{{ (institution.type or 'Institución').title() }}</strong>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <small class="text-muted d-block">Ubicación</small>
+                            <strong>{{ institution.city }}{{ ', ' + institution.state if institution.state else '' }}</strong>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <small class="text-muted d-block">Fecha de registro</small>
+                            <strong>{{ institution.created_at.strftime('%d/%m/%Y') if institution.created_at else 'N/A' }}</strong>
+                        </div>
+
+                        {% if institution.description %}
+                        <div class="mb-3">
+                            <small class="text-muted d-block">Descripción</small>
+                            <p class="small">{{ institution.description[:100] }}{% if institution.description|length > 100 %}...{% endif %}</p>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="institution-stats">
+                        <div class="stat-item">
+                            <div class="stat-number">{{ institution.user_count or 0 }}</div>
+                            <div class="stat-label">Usuarios</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number">{{ institution.admin_count or 0 }}</div>
+                            <div class="stat-label">Admins</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number">{{ institution.teacher_count or 0 }}</div>
+                            <div class="stat-label">Teachers</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number">{{ institution.student_count or 0 }}</div>
+                            <div class="stat-label">Students</div>
+                        </div>
+                    </div>
+
+                    <div class="card-footer bg-white border-0 d-flex justify-content-between">
+                        <div>
+                            <button class="action-btn" 
+                                    data-institution-id="{{ institution.id }}"
+                                    onclick="viewInstitutionDetails(this)" 
+                                    title="Ver detalles">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button class="action-btn" 
+                                    data-institution-id="{{ institution.id }}"
+                                    onclick="editInstitutionData(this)" 
+                                    title="Editar">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="action-btn" 
+                                    data-institution-id="{{ institution.id }}"
+                                    onclick="manageInstitutionUsers(this)" 
+                                    title="Gestionar usuarios">
+                                <i class="fas fa-users"></i>
+                            </button>
+                        </div>
+                        <div>
+                            <button class="action-btn" 
+                                    data-institution-id="{{ institution.id }}"
+                                    onclick="toggleInstitutionActiveStatus(this)" 
+                                    title="Cambiar estado">
+                                <i class="fas fa-power-off"></i>
+                            </button>
+                            <button class="action-btn text-danger" 
+                                    data-institution-id="{{ institution.id }}"
+                                    onclick="deleteInstitutionData(this)" 
+                                    title="Eliminar">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        {% endif %}
+
+        <!-- Si no hay instituciones -->
+        {% if not institutions or not institutions.items or institutions.items|length == 0 %}
+        <div class="col-12">
+            <div class="text-center py-5">
+                <div class="mb-4">
+                    <i class="fas fa-building text-muted" style="font-size: 4rem;"></i>
+                </div>
+                <h4 class="text-muted">No hay instituciones registradas</h4>
+                <p class="text-muted">Comienza creando tu primera institución educativa</p>
+                <a href="{{ url_for('superadmin.create_institution') }}" class="btn btn-primary">
+                    <i class="fas fa-plus me-2"></i>Crear Primera Institución
+                </a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Paginación -->
+    {% if institutions and institutions.pages > 1 %}
+    <nav class="d-flex justify-content-center mt-4">
+        <ul class="pagination">
+            {% if institutions.has_prev %}
+            <li class="page-item">
+                <a class="page-link" href="{{ url_for('superadmin.institutions', page=institutions.prev_num, search=search, status=status_filter) }}">
+                    <i class="fas fa-chevron-left"></i>
+                </a>
+            </li>
+            {% endif %}
+            
+            {% for page_num in institutions.iter_pages() %}
+                {% if page_num %}
+                    {% if page_num != institutions.page %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('superadmin.institutions', page=page_num, search=search, status=status_filter) }}">
+                            {{ page_num }}
+                        </a>
+                    </li>
+                    {% else %}
+                    <li class="page-item active">
+                        <span class="page-link">{{ page_num }}</span>
+                    </li>
+                    {% endif %}
+                {% endif %}
+            {% endfor %}
+            
+            {% if institutions.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="{{ url_for('superadmin.institutions', page=institutions.next_num, search=search, status=status_filter) }}">
+                    <i class="fas fa-chevron-right"></i>
+                </a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// FUNCIONES COMPLETAMENTE LIMPIAS - SIN ERRORES DE SINTAXIS
+
+function viewInstitutionDetails(element) {
+    const institutionId = element.getAttribute('data-institution-id');
+    
+    if (window.DashboardSuperadmin && window.DashboardSuperadmin.showNotification) {
+        window.DashboardSuperadmin.showNotification('Abriendo detalles de la institución...', 'info');
+    } else {
+        showNotificationFallback('Abriendo detalles de la institución...', 'info');
+    }
+    
+    // En el futuro: window.location.href = `/superadmin/institutions/${institutionId}`;
+}
+
+function editInstitutionData(element) {
+    const institutionId = element.getAttribute('data-institution-id');
+    
+    if (window.DashboardSuperadmin && window.DashboardSuperadmin.showNotification) {
+        window.DashboardSuperadmin.showNotification('Función de edición en desarrollo', 'info');
+    } else {
+        showNotificationFallback('Función de edición en desarrollo', 'info');
+    }
+    
+    // En el futuro: window.location.href = `/superadmin/institutions/${institutionId}/edit`;
+}
+
+function manageInstitutionUsers(element) {
+    const institutionId = element.getAttribute('data-institution-id');
+    
+    if (window.DashboardSuperadmin && window.DashboardSuperadmin.showNotification) {
+        window.DashboardSuperadmin.showNotification('Abriendo gestión de usuarios...', 'info');
+    } else {
+        showNotificationFallback('Abriendo gestión de usuarios...', 'info');
+    }
+    
+    // En el futuro: window.location.href = `/superadmin/institutions/${institutionId}/users`;
+}
+
+function toggleInstitutionActiveStatus(element) {
+    const institutionId = element.getAttribute('data-institution-id');
+    
+    if (confirm('¿Está seguro de cambiar el estado de esta institución?')) {
+        fetch(`/superadmin/institutions/${institutionId}/toggle_status`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                if (window.DashboardSuperadmin && window.DashboardSuperadmin.showNotification) {
+                    window.DashboardSuperadmin.showNotification(data.message, 'success');
+                } else {
+                    showNotificationFallback(data.message, 'success');
+                }
+                setTimeout(() => location.reload(), 1000);
+            } else {
+                if (window.DashboardSuperadmin && window.DashboardSuperadmin.showNotification) {
+                    window.DashboardSuperadmin.showNotification(data.message, 'danger');
+                } else {
+                    showNotificationFallback(data.message, 'danger');
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            if (window.DashboardSuperadmin && window.DashboardSuperadmin.showNotification) {
+                window.DashboardSuperadmin.showNotification('Error al cambiar estado', 'danger');
+            } else {
+                showNotificationFallback('Error al cambiar estado', 'danger');
+            }
+        });
+    }
+}
+
+function deleteInstitutionData(element) {
+    const institutionId = element.getAttribute('data-institution-id');
+    
+    if (confirm('¿Está COMPLETAMENTE SEGURO de eliminar esta institución?\n\nEsta acción eliminará:\n- Todos los usuarios de la institución\n- Todos los cursos y contenido\n- Toda la información relacionada\n\nEsta acción NO se puede deshacer.')) {
+        if (confirm('Confirme nuevamente: ¿Eliminar permanentemente esta institución?')) {
+            if (window.DashboardSuperadmin && window.DashboardSuperadmin.showNotification) {
+                window.DashboardSuperadmin.showNotification('Función de eliminación en desarrollo', 'warning');
+            } else {
+                showNotificationFallback('Función de eliminación en desarrollo', 'warning');
+            }
+            
+            // En el futuro: implementar lógica real de eliminación
+            /*
+            fetch(`/superadmin/institutions/${institutionId}/delete`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    element.closest('.col-lg-4').remove();
+                    showNotificationFallback(data.message, 'success');
+                } else {
+                    showNotificationFallback(data.message, 'danger');
+                }
+            });
+            */
+        }
+    }
+}
+
+function exportInstitutions() {
+    if (window.DashboardSuperadmin && window.DashboardSuperadmin.showNotification) {
+        window.DashboardSuperadmin.showNotification('Generando reporte de instituciones...', 'info');
+    } else {
+        showNotificationFallback('Generando reporte de instituciones...', 'info');
+    }
+    
+    // En el futuro: redirigir a la ruta de exportación
+    // window.location.href = '/superadmin/export/institutions';
+}
+
+// Función de notificación fallback
+function showNotificationFallback(message, type) {
+    // Si está disponible la función del dashboard principal, usarla
+    if (window.DashboardSuperadmin && window.DashboardSuperadmin.showNotification) {
+        window.DashboardSuperadmin.showNotification(message, type);
+        return;
+    }
+    
+    // Fallback simple
+    const notification = document.createElement('div');
+    notification.style.cssText = 
+        'position: fixed; top: 20px; right: 20px; z-index: 9999; ' +
+        'padding: 1rem 1.5rem; border-radius: 8px; color: white; ' +
+        'font-weight: 500; box-shadow: 0 4px 20px rgba(0,0,0,0.15); ' +
+        'transform: translateX(100%); transition: all 0.3s ease;';
+    
+    const colors = {
+        'success': '#10b981',
+        'info': '#3b82f6',
+        'warning': '#f59e0b',
+        'danger': '#ef4444'
+    };
+    
+    notification.style.backgroundColor = colors[type] || colors.info;
+    notification.textContent = message;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => notification.style.transform = 'translateX(0)', 100);
+    setTimeout(() => {
+        notification.style.transform = 'translateX(100%)';
+        setTimeout(() => notification.remove(), 300);
+    }, 3000);
+}
+</script>
+{% endblock %}

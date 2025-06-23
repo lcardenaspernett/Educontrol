@@ -1,4 +1,3 @@
-<!-- 1. TEMPLATE: app/templates/superadmin/users.html -->
 {% extends "base.html" %}
 
 {% block title %}Gestión de Usuarios - {{ super() }}{% endblock %}
@@ -162,16 +161,19 @@
                         <div class="d-flex align-items-center">
                             <span class="me-2 small">Estado:</span>
                             <div class="status-toggle {{ 'active' if user.is_active else '' }}" 
-                                 onclick="toggleUserStatus({{ user.id }}, this)"></div>
+                                 data-user-id="{{ user.id }}"
+                                 onclick="toggleUserStatus(this)"></div>
                         </div>
                         <div>
                             <button class="btn btn-sm btn-outline-primary me-1" 
-                                    onclick="editUser({{ user.id }})">
+                                    data-user-id="{{ user.id }}"
+                                    onclick="editUser(this)">
                                 <i class="fas fa-edit"></i>
                             </button>
                             {% if user.role != 'superadmin' %}
                             <button class="btn btn-sm btn-outline-danger" 
-                                    onclick="deleteUser({{ user.id }})">
+                                    data-user-id="{{ user.id }}"
+                                    onclick="deleteUser(this)">
                                 <i class="fas fa-trash"></i>
                             </button>
                             {% endif %}
@@ -226,7 +228,10 @@
 
 {% block extra_js %}
 <script>
-function toggleUserStatus(userId, toggle) {
+// Función para toggle de estado de usuario - CORREGIDA
+function toggleUserStatus(element) {
+    const userId = element.getAttribute('data-user-id');
+    
     fetch(`/superadmin/users/${userId}/toggle_status`, {
         method: 'POST',
         headers: {
@@ -236,28 +241,85 @@ function toggleUserStatus(userId, toggle) {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            toggle.classList.toggle('active');
-            showNotification(data.message, 'success');
+            element.classList.toggle('active');
+            // Usar la función de notificación del dashboard principal
+            if (window.DashboardSuperadmin && window.DashboardSuperadmin.showNotification) {
+                window.DashboardSuperadmin.showNotification(data.message, 'success');
+            } else {
+                showNotification(data.message, 'success');
+            }
         } else {
-            showNotification(data.message, 'error');
+            if (window.DashboardSuperadmin && window.DashboardSuperadmin.showNotification) {
+                window.DashboardSuperadmin.showNotification(data.message, 'danger');
+            } else {
+                showNotification(data.message, 'danger');
+            }
         }
     })
     .catch(error => {
-        showNotification('Error al cambiar estado', 'error');
+        console.error('Error:', error);
+        if (window.DashboardSuperadmin && window.DashboardSuperadmin.showNotification) {
+            window.DashboardSuperadmin.showNotification('Error al cambiar estado', 'danger');
+        } else {
+            showNotification('Error al cambiar estado', 'danger');
+        }
     });
 }
 
-function editUser(userId) {
-    showNotification('Función de edición en desarrollo', 'info');
+// Función para editar usuario - CORREGIDA
+function editUser(element) {
+    const userId = element.getAttribute('data-user-id');
+    
+    if (window.DashboardSuperadmin && window.DashboardSuperadmin.showNotification) {
+        window.DashboardSuperadmin.showNotification('Función de edición en desarrollo', 'info');
+    } else {
+        showNotification('Función de edición en desarrollo', 'info');
+    }
+    
+    // En el futuro: window.location.href = `/superadmin/users/${userId}/edit`;
 }
 
-function deleteUser(userId) {
+// Función para eliminar usuario - CORREGIDA
+function deleteUser(element) {
+    const userId = element.getAttribute('data-user-id');
+    
     if (confirm('¿Está seguro de eliminar este usuario?')) {
-        showNotification('Función de eliminación en desarrollo', 'info');
+        if (window.DashboardSuperadmin && window.DashboardSuperadmin.showNotification) {
+            window.DashboardSuperadmin.showNotification('Función de eliminación en desarrollo', 'info');
+        } else {
+            showNotification('Función de eliminación en desarrollo', 'info');
+        }
+        
+        // En el futuro: implementar lógica de eliminación
+        /*
+        fetch(`/superadmin/users/${userId}/delete`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                element.closest('.col-lg-6').remove();
+                showNotification(data.message, 'success');
+            } else {
+                showNotification(data.message, 'danger');
+            }
+        });
+        */
     }
 }
 
+// Función de notificación fallback (por si no está disponible la del dashboard)
 function showNotification(message, type) {
+    // Si está disponible la función del dashboard principal, usarla
+    if (window.DashboardSuperadmin && window.DashboardSuperadmin.showNotification) {
+        window.DashboardSuperadmin.showNotification(message, type);
+        return;
+    }
+    
+    // Fallback simple
     const notification = document.createElement('div');
     notification.style.cssText = 
         'position: fixed; top: 20px; right: 20px; z-index: 9999; ' +
@@ -269,7 +331,7 @@ function showNotification(message, type) {
         'success': '#10b981',
         'info': '#3b82f6',
         'warning': '#f59e0b',
-        'error': '#ef4444'
+        'danger': '#ef4444'
     };
     
     notification.style.backgroundColor = colors[type] || colors.info;
