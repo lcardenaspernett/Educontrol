@@ -1,9 +1,9 @@
 """
 Inicialización de la aplicación Flask EduControl - SECURIZADO CON TALISMAN
-ACTUALIZADO para compatibilidad completa con SuperAdmin
+ACTUALIZADO para compatibilidad completa con SuperAdmin y Admin - SIN EMOJIS WINDOWS
 """
 
-from flask import Flask, render_template
+from flask import Flask, render_template, request
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_login import LoginManager
@@ -22,7 +22,7 @@ migrate = Migrate()
 login_manager = LoginManager()
 bootstrap = Bootstrap()
 
-# 🔒 Rate Limiter
+# Rate Limiter
 limiter = Limiter(
     key_func=get_remote_address,
     default_limits=["200 per day", "50 per hour"],
@@ -58,21 +58,23 @@ def create_app(config_name='default'):
 
     # Importar modelos ANTES de registrar blueprints
     from app.models import user, institution
-    # Importar modelo course si existe
+    # Importar modelo course
     try:
         from app.models import course
         app.logger.info('Modelo Course cargado correctamente')
     except ImportError:
-        app.logger.info('Modelo Course no encontrado - Algunas funciones estarán limitadas')
+        app.logger.info('Modelo Course no encontrado - Algunas funciones estaran limitadas')
 
-    # Registrar blueprints
+    # Registrar blueprints - AGREGADO ADMIN
     from app.routes.main import main_bp
     from app.routes.auth import auth_bp
     from app.routes.superadmin import superadmin_bp
+    from app.routes.admin import admin_bp  # 🆕 NUEVO BLUEPRINT
 
     app.register_blueprint(main_bp)
     app.register_blueprint(auth_bp, url_prefix='/auth')
     app.register_blueprint(superadmin_bp, url_prefix='/superadmin')
+    app.register_blueprint(admin_bp, url_prefix='/admin')  # 🆕 REGISTRAR ADMIN
 
     # Crear directorio de uploads si no existe
     uploads_dir = os.path.join(app.root_path, 'uploads')
@@ -86,6 +88,12 @@ def create_app(config_name='default'):
         os.makedirs(backups_dir)
         app.logger.info('Directorio backups creado')
 
+    # Crear directorio de templates admin si no existe - 🆕 NUEVO
+    admin_templates_dir = os.path.join(app.root_path, 'templates', 'admin')
+    if not os.path.exists(admin_templates_dir):
+        os.makedirs(admin_templates_dir)
+        app.logger.info('Directorio templates/admin creado')
+
     # User loader para Flask-Login
     @login_manager.user_loader
     def load_user(user_id):
@@ -95,6 +103,7 @@ def create_app(config_name='default'):
     # Context processors globales
     @app.context_processor
     def inject_config():
+        """Inyectar configuración de la app en todos los templates"""
         return {
             'APP_NAME': app.config.get('APP_NAME', 'EduControl'),
             'APP_VERSION': app.config.get('APP_VERSION', '1.0.2')
@@ -110,6 +119,36 @@ def create_app(config_name='default'):
             'moment': lambda: datetime.utcnow()  # Para usar en templates como {{ moment() }}
         }
 
+    # Context processor para navegación por roles - 🆕 NUEVO
+    @app.context_processor
+    def inject_navigation():
+        """Inyectar información de navegación basada en roles"""
+        from flask_login import current_user
+        
+        navigation = {
+            'dashboard_url': '/',
+            'role_name': 'Invitado',
+            'can_access_admin': False,
+            'can_access_superadmin': False
+        }
+        
+        if current_user.is_authenticated:
+            navigation['role_name'] = current_user.role.title()
+            
+            if current_user.role == 'superadmin':
+                navigation['dashboard_url'] = '/superadmin'
+                navigation['can_access_superadmin'] = True
+                navigation['can_access_admin'] = True
+            elif current_user.role == 'admin':
+                navigation['dashboard_url'] = '/admin'
+                navigation['can_access_admin'] = True
+            elif current_user.role == 'teacher':
+                navigation['dashboard_url'] = '/teacher'  # Para futuro
+            elif current_user.role == 'student':
+                navigation['dashboard_url'] = '/student'  # Para futuro
+        
+        return {'navigation': navigation}
+
     # Manejadores de errores
     register_error_handlers(app)
 
@@ -124,7 +163,7 @@ def create_app(config_name='default'):
                 for filename in filenames:
                     rel_path = os.path.relpath(os.path.join(root, filename), static_path)
                     files.append(rel_path)
-            return f"<h3>Archivos estáticos encontrados:</h3><ul>{''.join([f'<li>{f}</li>' for f in files])}</ul>"
+            return f"<h3>Archivos estaticos encontrados:</h3><ul>{''.join([f'<li>{f}</li>' for f in files])}</ul>"
         
         @app.route('/debug/routes')
         def debug_routes():
@@ -138,10 +177,21 @@ def create_app(config_name='default'):
             
             return f"<h3>Rutas registradas:</h3><pre>{'<br>'.join(sorted(output))}</pre>"
 
+        # 🆕 Nueva ruta de debug para verificar blueprints
+        @app.route('/debug/blueprints')
+        def debug_blueprints():
+            """Mostrar blueprints registrados"""
+            blueprints_info = []
+            for name, blueprint in app.blueprints.items():
+                blueprints_info.append(f"<li><strong>{name}</strong>: {blueprint.url_prefix or '/'}</li>")
+            return f"<h3>Blueprints registrados:</h3><ul>{''.join(blueprints_info)}</ul>"
+
+        app.logger.info('Modo DEBUG activado - Rutas de diagnostico disponibles')
+
     return app
 
 def configure_security_headers(app):
-    """Configurar headers de seguridad con Flask-Talisman - SIN EMOJIS"""
+    """Configurar headers de seguridad con Flask-Talisman"""
     
     # Solo aplicar en producción o si se especifica
     if not app.debug or os.environ.get('FORCE_HTTPS_HEADERS') == 'true':
@@ -234,7 +284,7 @@ def configure_logging(app):
         
         # Logger de seguridad
         security_handler = RotatingFileHandler(
-            'logs/security.log', maxBytes=10240000, backupCount=20
+            'logs/security.log', maxBytes=10240000, backupCount=20, encoding='utf-8'
         )
         security_handler.setFormatter(logging.Formatter(
             '%(asctime)s %(levelname)s: %(message)s'
@@ -260,7 +310,7 @@ def configure_logging(app):
         
         # Logs de seguridad en desarrollo
         security_handler = RotatingFileHandler(
-            'logs/security.log', maxBytes=10240000, backupCount=20
+            'logs/security.log', maxBytes=10240000, backupCount=20, encoding='utf-8'
         )
         security_handler.setFormatter(logging.Formatter(
             '%(asctime)s %(levelname)s: %(message)s'
@@ -274,7 +324,7 @@ def configure_logging(app):
         
         # Logger general también a archivo en desarrollo
         file_handler = RotatingFileHandler(
-            'logs/educontrol.log', maxBytes=10240000, backupCount=10
+            'logs/educontrol.log', maxBytes=10240000, backupCount=10, encoding='utf-8'
         )
         file_handler.setFormatter(logging.Formatter(
             '%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]'
@@ -289,11 +339,15 @@ def register_error_handlers(app):
     
     @app.errorhandler(404)
     def not_found_error(error):
-        app.logger.warning(f'404 - Página no encontrada: {error} - URL: {request.url if "request" in globals() else "unknown"}')
+        try:
+            url = request.url if request else "unknown"
+            app.logger.warning(f'404 - Pagina no encontrada: {error} - URL: {url}')
+        except:
+            app.logger.warning(f'404 - Pagina no encontrada: {error}')
         try:
             return render_template('errors/404.html'), 404
         except:
-            return '<h1>404 - Página no encontrada</h1>', 404
+            return '<h1>404 - Pagina no encontrada</h1>', 404
 
     @app.errorhandler(403)
     def forbidden_error(error):
@@ -321,7 +375,7 @@ def register_error_handlers(app):
         try:
             return render_template('errors/429.html'), 429
         except:
-            return '<h1>429 - Demasiadas solicitudes</h1><p>Has excedido el límite de solicitudes. Intenta más tarde.</p>', 429
+            return '<h1>429 - Demasiadas solicitudes</h1><p>Has excedido el limite de solicitudes. Intenta mas tarde.</p>', 429
 
     @app.errorhandler(413)
     def file_too_large(error):
@@ -370,28 +424,60 @@ def validate_config(app):
             missing_configs.append(config_key)
     
     if missing_configs:
-        app.logger.error(f'❌ Configuraciones faltantes: {", ".join(missing_configs)}')
+        app.logger.error(f'Configuraciones faltantes: {", ".join(missing_configs)}')
         raise RuntimeError(f'Configuraciones requeridas faltantes: {missing_configs}')
     else:
-        app.logger.info('✅ Configuración validada correctamente')
+        app.logger.info('Configuracion validada correctamente')
 
-# Función para inicializar datos de prueba (solo en desarrollo)
+# Función para inicializar datos de prueba (solo en desarrollo) - 🆕 MEJORADA
 def init_development_data(app):
     """Inicializar datos de desarrollo si es necesario"""
     if app.debug and app.config.get('INIT_SAMPLE_DATA', False):
         with app.app_context():
             from app.models.user import User
             from app.models.institution import Institution
+            from app.models.course import Course
             
             # Verificar si ya existen datos
             if User.query.count() == 0:
-                app.logger.info('🔧 Inicializando datos de desarrollo...')
-                # Aquí puedes agregar lógica para crear datos de prueba
-                # create_sample_institutions()
-                # create_sample_users()
-                pass
+                app.logger.info('Inicializando datos de desarrollo...')
+                
+                # Crear institución de ejemplo
+                institution = Institution(
+                    name="Institución de Prueba",
+                    code="INST001",
+                    city="Barranquilla",
+                    is_active=True
+                )
+                db.session.add(institution)
+                db.session.flush()
+                
+                # Crear usuarios de ejemplo
+                # Superadmin
+                superadmin = User(
+                    full_name="Super Administrador",
+                    email="superadmin@test.com",
+                    role="superadmin",
+                    is_active=True
+                )
+                superadmin.set_password("admin123")
+                
+                # Admin institucional
+                admin = User(
+                    full_name="Admin Institucional",
+                    email="admin@test.com",
+                    role="admin",
+                    institution_id=institution.id,
+                    is_active=True
+                )
+                admin.set_password("admin123")
+                
+                db.session.add_all([superadmin, admin])
+                db.session.commit()
+                
+                app.logger.info('Datos de desarrollo creados exitosamente')
             else:
-                app.logger.info('📊 Datos de desarrollo ya existentes')
+                app.logger.info('Datos de desarrollo ya existentes')
 
 def create_app_with_validation(config_name='default'):
     """Crear aplicación con validaciones completas - COMPATIBLE WINDOWS"""
@@ -408,8 +494,11 @@ def create_app_with_validation(config_name='default'):
         if app.debug:
             init_development_data(app)
         
-        app.logger.info('🎉 EduControl inicializado correctamente')
-        app.logger.info(f'🔧 Modo: {"Desarrollo" if app.debug else "Producción"}')
-        app.logger.info(f'📊 Base de datos: {app.config.get("DATABASE_URL", "No configurada")[:50]}...')
+        app.logger.info('EduControl inicializado correctamente')
+        app.logger.info(f'Modo: {"Desarrollo" if app.debug else "Produccion"}')
+        app.logger.info(f'Base de datos: {app.config.get("DATABASE_URL", "No configurada")[:50]}...')
+        
+        # Log de blueprints registrados - 🆕 NUEVO
+        app.logger.info(f'Blueprints registrados: {list(app.blueprints.keys())}')
     
     return app

@@ -1,0 +1,981 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard Admin - {{ current_user.institution.name if current_user.institution else 'Sin Institución' }} - {{ super() }}{% endblock %}
+{% block page_title %}Dashboard Administrador{% endblock %}
+
+{% block extra_css %}
+<style>
+    .admin-welcome {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 16px;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    }
+
+    .institution-header {
+        background: linear-gradient(135deg, #8E2DE2 0%, #4A00E0 100%);
+        color: white;
+        padding: 1.5rem;
+        border-radius: 16px;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    }
+
+    .stat-card {
+        background: white;
+        border-radius: 16px;
+        padding: 2rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        transition: all 0.3s ease;
+        cursor: pointer;
+        border: none;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .stat-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #8E2DE2, #4A00E0);
+    }
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+    }
+
+    .stat-card.students::before {
+        background: linear-gradient(90deg, #43e97b, #38f9d7);
+    }
+
+    .stat-card.teachers::before {
+        background: linear-gradient(90deg, #4facfe, #00f2fe);
+    }
+
+    .stat-card.courses::before {
+        background: linear-gradient(90deg, #fa709a, #fee140);
+    }
+
+    .stat-card.active-users::before {
+        background: linear-gradient(90deg, #11998e, #38ef7d);
+    }
+
+    .stat-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        color: #8E2DE2;
+    }
+
+    .stat-card.students .stat-icon {
+        color: #43e97b;
+    }
+
+    .stat-card.teachers .stat-icon {
+        color: #4facfe;
+    }
+
+    .stat-card.courses .stat-icon {
+        color: #fa709a;
+    }
+
+    .stat-card.active-users .stat-icon {
+        color: #11998e;
+    }
+
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: 800;
+        margin-bottom: 0.5rem;
+        color: #1f2937;
+    }
+
+    .stat-label {
+        font-size: 1.1rem;
+        color: #6b7280;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+
+    .stat-change {
+        font-size: 0.9rem;
+        color: #10b981;
+        font-weight: 500;
+    }
+
+    .quick-action-card {
+        background: white;
+        border: 2px solid #e5e7eb;
+        border-radius: 12px;
+        padding: 1.5rem;
+        text-decoration: none;
+        color: #374151;
+        transition: all 0.3s ease;
+        display: block;
+        text-align: center;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        height: 100%;
+    }
+
+    .quick-action-card:hover {
+        border-color: #8E2DE2;
+        background: rgba(142, 45, 226, 0.05);
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(142, 45, 226, 0.15);
+        text-decoration: none;
+        color: #8E2DE2;
+    }
+
+    .quick-action-icon {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+        color: #8E2DE2;
+        transition: all 0.3s ease;
+    }
+
+    .quick-action-card:hover .quick-action-icon {
+        transform: scale(1.1);
+        color: #4A00E0;
+    }
+
+    .quick-action-title {
+        font-weight: 600;
+        font-size: 1rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .quick-action-desc {
+        font-size: 0.85rem;
+        color: #6b7280;
+        line-height: 1.4;
+    }
+
+    .chart-container {
+        background: white;
+        border-radius: 16px;
+        padding: 2rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        margin-bottom: 2rem;
+    }
+
+    .recent-activity {
+        background: white;
+        border-radius: 16px;
+        padding: 2rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    }
+
+    .activity-item {
+        display: flex;
+        align-items: start;
+        padding: 1rem 0;
+        border-bottom: 1px solid #f3f4f6;
+        transition: all 0.3s ease;
+    }
+
+    .activity-item:last-child {
+        border-bottom: none;
+    }
+
+    .activity-item:hover {
+        background: rgba(142, 45, 226, 0.02);
+        margin: 0 -1rem;
+        padding: 1rem;
+        border-radius: 8px;
+    }
+
+    .activity-avatar {
+        width: 45px;
+        height: 45px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #8E2DE2, #4A00E0);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: bold;
+        margin-right: 1rem;
+        flex-shrink: 0;
+    }
+
+    .activity-content {
+        flex: 1;
+    }
+
+    .activity-title {
+        font-weight: 600;
+        color: #1f2937;
+        margin-bottom: 0.25rem;
+    }
+
+    .activity-desc {
+        color: #6b7280;
+        font-size: 0.9rem;
+        margin-bottom: 0.25rem;
+    }
+
+    .activity-time {
+        color: #9ca3af;
+        font-size: 0.8rem;
+    }
+
+    .user-table {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        overflow: hidden;
+    }
+
+    .user-table .table {
+        margin-bottom: 0;
+    }
+
+    .user-table .table th {
+        border: none;
+        background: #f8fafc;
+        color: #374151;
+        font-weight: 600;
+        padding: 1rem;
+    }
+
+    .user-table .table td {
+        border: none;
+        border-top: 1px solid #f3f4f6;
+        padding: 1rem;
+        vertical-align: middle;
+    }
+
+    .user-avatar-sm {
+        width: 35px;
+        height: 35px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #8E2DE2, #4A00E0);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: bold;
+        font-size: 0.8rem;
+    }
+
+    .role-badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    .role-teacher {
+        background: #dbeafe;
+        color: #1d4ed8;
+    }
+
+    .role-student {
+        background: #dcfce7;
+        color: #166534;
+    }
+
+    .role-admin {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    .status-active {
+        color: #10b981;
+    }
+
+    .status-inactive {
+        color: #ef4444;
+    }
+
+    .institution-logo {
+        width: 80px;
+        height: 80px;
+        background: rgba(255,255,255,0.2);
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        font-weight: bold;
+        margin-right: 1.5rem;
+    }
+
+    .btn-action {
+        background: linear-gradient(135deg, #8E2DE2 0%, #4A00E0 100%);
+        border: none;
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .btn-action:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(142, 45, 226, 0.4);
+        color: white;
+        text-decoration: none;
+    }
+
+    .btn-secondary-action {
+        background: #6b7280;
+        border: none;
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        font-size: 0.875rem;
+        transition: all 0.3s ease;
+        text-decoration: none;
+    }
+
+    .btn-secondary-action:hover {
+        background: #4b5563;
+        color: white;
+        text-decoration: none;
+    }
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
+
+{% block content %}
+<!-- Institution Header -->
+<div class="institution-header">
+    <div class="row align-items-center">
+        <div class="col-md-8">
+            <div class="d-flex align-items-center">
+                <div class="institution-logo">
+                    {{ current_user.institution.name[0] if current_user.institution else 'I' }}
+                </div>
+                <div>
+                    <h1 class="mb-1">{{ current_user.institution.name if current_user.institution else 'Sin Institución Asignada' }}</h1>
+                    <p class="mb-2 opacity-75">
+                        {% if current_user.institution %}
+                            {{ current_user.institution.city }}{% if current_user.institution.address %}, {{ current_user.institution.address }}{% endif %}
+                        {% else %}
+                            Contacte al superadministrador para asignar institución
+                        {% endif %}
+                    </p>
+                    <div class="d-flex align-items-center gap-3">
+                        <small>
+                            <i class="fas fa-calendar me-1"></i>
+                            Año Académico: {{ current_user.institution.academic_year if current_user.institution else '2024' }}
+                        </small>
+                        <small>
+                            <i class="fas fa-code me-1"></i>
+                            Código: {{ current_user.institution.code if current_user.institution else 'N/A' }}
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 text-end">
+            <span class="badge bg-light text-dark fs-6">
+                <i class="fas fa-user-shield me-1"></i>
+                Administrador
+            </span>
+            <br>
+            <small class="opacity-75 mt-2 d-block">
+                Bienvenido, {{ current_user.full_name.split(' ')[0] if current_user.full_name else current_user.email }}
+            </small>
+        </div>
+    </div>
+</div>
+
+<!-- Estadísticas de la Institución -->
+<div class="row g-4 mb-4">
+    <div class="col-lg-3 col-md-6">
+        <div class="stat-card students">
+            <div class="stat-icon">
+                <i class="fas fa-user-graduate"></i>
+            </div>
+            <div class="stat-number" data-target="{{ institution_stats.total_students if institution_stats else 0 }}">0</div>
+            <div class="stat-label">Estudiantes</div>
+            <div class="stat-change">
+                <i class="fas fa-arrow-up me-1"></i>
+                +{{ institution_stats.new_students_this_month if institution_stats else 0 }} este mes
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-3 col-md-6">
+        <div class="stat-card teachers">
+            <div class="stat-icon">
+                <i class="fas fa-chalkboard-teacher"></i>
+            </div>
+            <div class="stat-number" data-target="{{ institution_stats.total_teachers if institution_stats else 0 }}">0</div>
+            <div class="stat-label">Profesores</div>
+            <div class="stat-change">
+                <i class="fas fa-check me-1"></i>
+                {{ institution_stats.active_teachers if institution_stats else 0 }} activos
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-3 col-md-6">
+        <div class="stat-card courses">
+            <div class="stat-icon">
+                <i class="fas fa-book"></i>
+            </div>
+            <div class="stat-number" data-target="{{ institution_stats.total_courses if institution_stats else 0 }}">0</div>
+            <div class="stat-label">Cursos</div>
+            <div class="stat-change">
+                <i class="fas fa-chart-line me-1"></i>
+                {{ institution_stats.active_courses if institution_stats else 0 }} activos
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-3 col-md-6">
+        <div class="stat-card active-users">
+            <div class="stat-icon">
+                <i class="fas fa-users"></i>
+            </div>
+            <div class="stat-number" data-target="{{ institution_stats.total_users if institution_stats else 0 }}">0</div>
+            <div class="stat-label">Total Usuarios</div>
+            <div class="stat-change">
+                <i class="fas fa-eye me-1"></i>
+                {{ institution_stats.users_online if institution_stats else 0 }} en línea
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Contenido Principal -->
+<div class="row">
+    <!-- Columna Izquierda - Gráficos y Acciones -->
+    <div class="col-lg-8">
+        <!-- Gráfico de Usuarios por Rol -->
+        <div class="chart-container">
+            <h5 class="mb-4">
+                <i class="fas fa-chart-pie me-2"></i>
+                Distribución de Usuarios por Rol
+            </h5>
+            <div style="position: relative; height: 300px;">
+                <canvas id="usersChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Acciones Rápidas -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-bolt me-2"></i>
+                    Acciones Rápidas
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <a href="#" class="quick-action-card" onclick="showModal('createUser')">
+                            <div class="quick-action-icon">
+                                <i class="fas fa-user-plus"></i>
+                            </div>
+                            <div class="quick-action-title">Agregar Usuario</div>
+                            <div class="quick-action-desc">Crear nuevos estudiantes, profesores o administradores</div>
+                        </a>
+                    </div>
+                    <div class="col-md-4">
+                        <a href="#" class="quick-action-card" onclick="showModal('createCourse')">
+                            <div class="quick-action-icon">
+                                <i class="fas fa-plus-circle"></i>
+                            </div>
+                            <div class="quick-action-title">Nuevo Curso</div>
+                            <div class="quick-action-desc">Crear y configurar nuevos cursos o asignaturas</div>
+                        </a>
+                    </div>
+                    <div class="col-md-4">
+                        <a href="#" class="quick-action-card" onclick="showUsersTable()">
+                            <div class="quick-action-icon">
+                                <i class="fas fa-users-cog"></i>
+                            </div>
+                            <div class="quick-action-title">Gestionar Usuarios</div>
+                            <div class="quick-action-desc">Ver, editar y administrar todos los usuarios</div>
+                        </a>
+                    </div>
+                    <div class="col-md-4">
+                        <a href="#" class="quick-action-card" onclick="showNotification('Función en desarrollo', 'info')">
+                            <div class="quick-action-icon">
+                                <i class="fas fa-chart-bar"></i>
+                            </div>
+                            <div class="quick-action-title">Reportes</div>
+                            <div class="quick-action-desc">Generar reportes académicos y estadísticas</div>
+                        </a>
+                    </div>
+                    <div class="col-md-4">
+                        <a href="#" class="quick-action-card" onclick="showNotification('Función en desarrollo', 'info')">
+                            <div class="quick-action-icon">
+                                <i class="fas fa-calendar-alt"></i>
+                            </div>
+                            <div class="quick-action-title">Calendario</div>
+                            <div class="quick-action-desc">Ver eventos y programar actividades institucionales</div>
+                        </a>
+                    </div>
+                    <div class="col-md-4">
+                        <a href="#" class="quick-action-card" onclick="showNotification('Función en desarrollo', 'info')">
+                            <div class="quick-action-icon">
+                                <i class="fas fa-cog"></i>
+                            </div>
+                            <div class="quick-action-title">Configuración</div>
+                            <div class="quick-action-desc">Ajustes de la institución y preferencias</div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Columna Derecha - Actividad y Usuarios -->
+    <div class="col-lg-4">
+        <!-- Actividad Reciente -->
+        <div class="recent-activity mb-4">
+            <h6 class="mb-3">
+                <i class="fas fa-history me-2"></i>
+                Actividad Reciente
+            </h6>
+            
+            {% if recent_activities %}
+                {% for activity in recent_activities %}
+                <div class="activity-item">
+                    <div class="activity-avatar">
+                        {{ activity.user_name[0] if activity.user_name else 'U' }}
+                    </div>
+                    <div class="activity-content">
+                        <div class="activity-title">{{ activity.title }}</div>
+                        <div class="activity-desc">{{ activity.description }}</div>
+                        <div class="activity-time">{{ activity.time }}</div>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="activity-item">
+                    <div class="activity-avatar">
+                        {{ current_user.full_name[0] if current_user.full_name else 'A' }}
+                    </div>
+                    <div class="activity-content">
+                        <div class="activity-title">Panel de administración accedido</div>
+                        <div class="activity-desc">{{ current_user.full_name }} ingresó al dashboard</div>
+                        <div class="activity-time">Ahora</div>
+                    </div>
+                </div>
+                <div class="activity-item">
+                    <div class="activity-avatar">S</div>
+                    <div class="activity-content">
+                        <div class="activity-title">Sistema iniciado</div>
+                        <div class="activity-desc">EduControl se inició correctamente</div>
+                        <div class="activity-time">Hace 2 horas</div>
+                    </div>
+                </div>
+            {% endif %}
+            
+            <div class="text-center mt-3">
+                <a href="#" class="btn-secondary-action" onclick="showNotification('Función en desarrollo', 'info')">
+                    Ver toda la actividad
+                </a>
+            </div>
+        </div>
+
+        <!-- Usuarios Recientes -->
+        <div class="user-table">
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th colspan="3">
+                                <i class="fas fa-users me-2"></i>
+                                Usuarios Recientes
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if recent_users %}
+                            {% for user in recent_users %}
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="user-avatar-sm me-2">
+                                            {{ user.full_name[0] if user.full_name else user.email[0] }}
+                                        </div>
+                                        <div>
+                                            <div class="fw-semibold">{{ user.full_name or user.email }}</div>
+                                            <small class="text-muted">{{ user.email if user.full_name else '' }}</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="role-badge role-{{ user.role }}">
+                                        {{ user.role.title() }}
+                                    </span>
+                                </td>
+                                <td class="text-end">
+                                    <i class="fas fa-circle status-{{ 'active' if user.is_active else 'inactive' }}"></i>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="3" class="text-center text-muted py-4">
+                                    <i class="fas fa-users fa-2x mb-2 d-block opacity-50"></i>
+                                    No hay usuarios registrados aún
+                                    <br>
+                                    <small>Los nuevos usuarios aparecerán aquí</small>
+                                </td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="p-3 border-top">
+                <a href="#" class="btn-action w-100 justify-content-center" onclick="showUsersTable()">
+                    <i class="fas fa-users"></i>
+                    Ver Todos los Usuarios
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para Crear Usuario -->
+<div class="modal fade" id="createUserModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-user-plus me-2"></i>
+                    Agregar Nuevo Usuario
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="createUserForm">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Nombre Completo *</label>
+                            <input type="text" class="form-control" name="full_name" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Email *</label>
+                            <input type="email" class="form-control" name="email" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Rol *</label>
+                            <select class="form-select" name="role" required>
+                                <option value="">Seleccionar rol...</option>
+                                <option value="student">Estudiante</option>
+                                <option value="teacher">Profesor</option>
+                                <option value="admin">Administrador</option>
+                                <option value="parent">Padre/Madre</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Contraseña Temporal *</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" name="password" id="tempPassword" required>
+                                <button class="btn btn-outline-secondary" type="button" onclick="generatePassword()">
+                                    <i class="fas fa-random"></i>
+                                </button>
+                            </div>
+                            <small class="text-muted">El usuario deberá cambiarla en su primer acceso</small>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn-action" onclick="createUser()">
+                    <i class="fas fa-save"></i>
+                    Crear Usuario
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para Crear Curso -->
+<div class="modal fade" id="createCourseModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-plus-circle me-2"></i>
+                    Crear Nuevo Curso
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="createCourseForm">
+                    <div class="row g-3">
+                        <div class="col-md-8">
+                            <label class="form-label">Nombre del Curso *</label>
+                            <input type="text" class="form-control" name="name" placeholder="Ej: Matemáticas Básicas" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Código *</label>
+                            <input type="text" class="form-control" name="code" placeholder="MAT001" required>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Descripción</label>
+                            <textarea class="form-control" name="description" rows="3" placeholder="Breve descripción del curso..."></textarea>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Profesor Asignado</label>
+                            <select class="form-select" name="teacher_id">
+                                <option value="">Sin asignar</option>
+                                {% if available_teachers %}
+                                    {% for teacher in available_teachers %}
+                                    <option value="{{ teacher.id }}">{{ teacher.full_name }}</option>
+                                    {% endfor %}
+                                {% endif %}
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Estado</label>
+                            <select class="form-select" name="status">
+                                <option value="active">Activo</option>
+                                <option value="inactive">Inactivo</option>
+                            </select>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn-action" onclick="createCourse()">
+                    <i class="fas fa-save"></i>
+                    Crear Curso
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Script de datos embebidos desde el servidor
+
+</script>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Animar números
+    animateStats();
+    
+    // Crear gráfico de usuarios
+    createUsersChart();
+});
+
+function animateStats() {
+    const statNumbers = document.querySelectorAll('.stat-number[data-target]');
+    
+    statNumbers.forEach(number => {
+        const target = parseInt(number.getAttribute('data-target')) || 0;
+        const duration = 2000;
+        const startTime = performance.now();
+        
+        function updateNumber(currentTime) {
+            const elapsed = currentTime - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            const easeOutQuart = 1 - Math.pow(1 - progress, 4);
+            const currentValue = Math.round(target * easeOutQuart);
+            
+            number.textContent = currentValue;
+            
+            if (progress < 1) {
+                requestAnimationFrame(updateNumber);
+            }
+        }
+        
+        if (target > 0) {
+            number.textContent = '0';
+            requestAnimationFrame(updateNumber);
+        }
+    });
+}
+
+function createUsersChart() {
+    const ctx = document.getElementById('usersChart');
+    if (!ctx) return;
+    
+    const data = {
+        labels: ['Estudiantes', 'Profesores', 'Administradores'],
+        datasets: [{
+            data: [chartData.students, chartData.teachers, chartData.admins],
+            backgroundColor: [
+                '#43e97b',
+                '#4facfe', 
+                '#fa709a'
+            ],
+            borderWidth: 0,
+            hoverOffset: 4
+        }]
+    };
+    
+    new Chart(ctx, {
+        type: 'doughnut',
+        data: data,
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        padding: 20,
+                        usePointStyle: true,
+                        font: {
+                            size: 12,
+                            weight: '600'
+                        }
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const label = context.label;
+                            const value = context.parsed;
+                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                            const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                            return `${label}: ${value} (${percentage}%)`;
+                        }
+                    }
+                }
+            },
+            cutout: '60%'
+        }
+    });
+}
+
+function showModal(type) {
+    if (type === 'createUser') {
+        const modal = new bootstrap.Modal(document.getElementById('createUserModal'));
+        modal.show();
+    } else if (type === 'createCourse') {
+        const modal = new bootstrap.Modal(document.getElementById('createCourseModal'));
+        modal.show();
+    }
+}
+
+function generatePassword() {
+    const chars = 'ABCDEFGHJKMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789';
+    let password = '';
+    for (let i = 0; i < 8; i++) {
+        password += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    document.getElementById('tempPassword').value = password;
+}
+
+function createUser() {
+    const form = document.getElementById('createUserForm');
+    const formData = new FormData(form);
+    
+    // Validar campos requeridos
+    const requiredFields = ['full_name', 'email', 'role', 'password'];
+    let isValid = true;
+    
+    requiredFields.forEach(field => {
+        if (!formData.get(field)) {
+            isValid = false;
+            form.querySelector(`[name="${field}"]`).classList.add('is-invalid');
+        } else {
+            form.querySelector(`[name="${field}"]`).classList.remove('is-invalid');
+        }
+    });
+    
+    if (!isValid) {
+        showNotification('Por favor complete todos los campos requeridos', 'warning');
+        return;
+    }
+    
+    // Simular creación de usuario
+    showNotification('Creando usuario...', 'info');
+    
+    setTimeout(() => {
+        showNotification('Usuario creado exitosamente', 'success');
+        bootstrap.Modal.getInstance(document.getElementById('createUserModal')).hide();
+        form.reset();
+        
+        // Simular actualización de estadísticas
+        updateStats();
+    }, 1500);
+}
+
+function createCourse() {
+    const form = document.getElementById('createCourseForm');
+    const formData = new FormData(form);
+    
+    if (!formData.get('name') || !formData.get('code')) {
+        showNotification('Nombre y código son requeridos', 'warning');
+        return;
+    }
+    
+    showNotification('Creando curso...', 'info');
+    
+    setTimeout(() => {
+        showNotification('Curso creado exitosamente', 'success');
+        bootstrap.Modal.getInstance(document.getElementById('createCourseModal')).hide();
+        form.reset();
+        
+        updateStats();
+    }, 1500);
+}
+
+function showUsersTable() {
+    showNotification('Abriendo gestión de usuarios...', 'info');
+    // En el futuro: redirigir a página de gestión de usuarios
+}
+
+function updateStats() {
+    // Simular actualización de estadísticas después de crear usuarios/cursos
+    const statNumbers = document.querySelectorAll('.stat-number');
+    statNumbers.forEach(stat => {
+        const current = parseInt(stat.textContent);
+        stat.setAttribute('data-target', current + 1);
+    });
+    animateStats();
+}
+
+function showNotification(message, type) {
+    const notification = document.createElement('div');
+    notification.style.cssText = 
+        'position: fixed; top: 20px; right: 20px; z-index: 9999; ' +
+        'padding: 1rem 1.5rem; border-radius: 8px; color: white; ' +
+        'font-weight: 500; box-shadow: 0 4px 20px rgba(0,0,0,0.15); ' +
+        'transform: translateX(100%); transition: all 0.3s ease;';
+    
+    const colors = {
+        'success': '#10b981',
+        'info': '#3b82f6', 
+        'warning': '#f59e0b',
+        'danger': '#ef4444'
+    };
+    
+    notification.style.backgroundColor = colors[type] || colors.info;
+    notification.textContent = message;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => notification.style.transform = 'translateX(0)', 100);
+    setTimeout(() => {
+        notification.style.transform = 'translateX(100%)';
+        setTimeout(() => notification.remove(), 300);
+    }, 3000);
+}
+
+// Generar contraseña automáticamente al cargar
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-generar contraseña cuando se abre el modal
+    document.getElementById('createUserModal').addEventListener('shown.bs.modal', function() {
+        generatePassword();
+    });
+});

@@ -1,4 +1,3 @@
-<!-- 3. TEMPLATE: app/templates/superadmin/settings.html -->
 {% extends "base.html" %}
 
 {% block title %}Configuración del Sistema - {{ super() }}{% endblock %}
@@ -31,7 +30,7 @@
 
     .config-item {
         display: flex;
-        justify-content: between;
+        justify-content: space-between;
         align-items: center;
         padding: 1rem 0;
         border-bottom: 1px solid #f1f3f4;
@@ -137,6 +136,7 @@
     .action-btn:hover {
         transform: translateY(-2px);
         box-shadow: 0 8px 25px rgba(142, 45, 226, 0.6);
+        color: white;
     }
 
     .danger-btn {
@@ -146,6 +146,7 @@
 
     .danger-btn:hover {
         box-shadow: 0 8px 25px rgba(239, 68, 68, 0.6);
+        color: white;
     }
 
     .log-entry {
@@ -361,16 +362,16 @@
             
             <div id="log-container">
                 <div class="log-entry info">
-                    <strong>[{{ moment().format('YYYY-MM-DD HH:mm:ss') }}]</strong> INFO - Dashboard de SuperAdmin accedido por {{ current_user.username }}
+                    <strong>[{{ log_timestamps.now.strftime('%Y-%m-%d %H:%M:%S') if log_timestamps else '2025-06-23 16:56:00' }}]</strong> INFO - Dashboard de SuperAdmin accedido por {{ current_user.username }}
                 </div>
                 <div class="log-entry success">
-                    <strong>[{{ moment().subtract(1, 'hour').format('YYYY-MM-DD HH:mm:ss') }}]</strong> SUCCESS - Backup automático completado exitosamente
+                    <strong>[{{ log_timestamps.one_hour_ago.strftime('%Y-%m-%d %H:%M:%S') if log_timestamps else '2025-06-23 15:56:00' }}]</strong> SUCCESS - Backup automático completado exitosamente
                 </div>
                 <div class="log-entry warning">
-                    <strong>[{{ moment().subtract(2, 'hours').format('YYYY-MM-DD HH:mm:ss') }}]</strong> WARNING - Uso de almacenamiento alto (85%)
+                    <strong>[{{ log_timestamps.two_hours_ago.strftime('%Y-%m-%d %H:%M:%S') if log_timestamps else '2025-06-23 14:56:00' }}]</strong> WARNING - Uso de almacenamiento alto (85%)
                 </div>
                 <div class="log-entry info">
-                    <strong>[{{ moment().subtract(3, 'hours').format('YYYY-MM-DD HH:mm:ss') }}]</strong> INFO - Sistema iniciado correctamente
+                    <strong>[{{ log_timestamps.three_hours_ago.strftime('%Y-%m-%d %H:%M:%S') if log_timestamps else '2025-06-23 13:56:00' }}]</strong> INFO - Sistema iniciado correctamente
                 </div>
             </div>
         </div>
@@ -615,9 +616,64 @@ function showNotification(message, type) {
     if (window.DashboardSuperadmin && window.DashboardSuperadmin.showNotification) {
         window.DashboardSuperadmin.showNotification(message, type);
     } else {
-        // Fallback si no está disponible
-        alert(message);
+        // Fallback mejorado
+        const notification = document.createElement('div');
+        notification.style.cssText = 
+            'position: fixed; top: 20px; right: 20px; z-index: 9999; ' +
+            'padding: 1rem 1.5rem; border-radius: 8px; color: white; ' +
+            'font-weight: 500; box-shadow: 0 4px 20px rgba(0,0,0,0.15); ' +
+            'transform: translateX(100%); transition: all 0.3s ease;';
+        
+        const colors = {
+            'success': '#10b981',
+            'info': '#3b82f6',
+            'warning': '#f59e0b',
+            'danger': '#ef4444'
+        };
+        
+        notification.style.backgroundColor = colors[type] || colors.info;
+        notification.textContent = message;
+        
+        document.body.appendChild(notification);
+        
+        setTimeout(() => notification.style.transform = 'translateX(0)', 100);
+        setTimeout(() => {
+            notification.style.transform = 'translateX(100%)';
+            setTimeout(() => notification.remove(), 300);
+        }, 3000);
     }
 }
+
+// Función para actualizar timestamps dinámicamente
+function updateLogTimestamps() {
+    const now = new Date();
+    const logEntries = document.querySelectorAll('#log-container .log-entry strong');
+    
+    if (logEntries.length >= 4) {
+        const timestamps = [
+            now,                                    // Ahora
+            new Date(now.getTime() - 60*60*1000),  // Hace 1 hora
+            new Date(now.getTime() - 2*60*60*1000), // Hace 2 horas
+            new Date(now.getTime() - 3*60*60*1000)  // Hace 3 horas
+        ];
+        
+        timestamps.forEach((timestamp, index) => {
+            if (logEntries[index]) {
+                const formattedTime = timestamp.toISOString().slice(0, 19).replace('T', ' ');
+                const currentText = logEntries[index].innerHTML;
+                const newText = currentText.replace(/\[\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\]/, `[${formattedTime}]`);
+                logEntries[index].innerHTML = newText;
+            }
+        });
+    }
+}
+
+// Actualizar timestamps cada minuto
+setInterval(updateLogTimestamps, 60000);
+
+// Actualizar al cargar la página
+document.addEventListener('DOMContentLoaded', function() {
+    updateLogTimestamps();
+});
 </script>
 {% endblock %}

@@ -748,7 +748,18 @@ def settings():
         # Información del sistema
         system_info = get_real_system_info()
         
-        return render_template('superadmin/settings.html', system_info=system_info)
+        # Fechas dinámicas para los logs
+        now = datetime.utcnow()
+        log_timestamps = {
+            'now': now,
+            'one_hour_ago': now - timedelta(hours=1),
+            'two_hours_ago': now - timedelta(hours=2),
+            'three_hours_ago': now - timedelta(hours=3)
+        }
+        
+        return render_template('superadmin/settings.html', 
+                             system_info=system_info,
+                             log_timestamps=log_timestamps)
     
     except Exception as e:
         security_logger.error(f'SETTINGS_ERROR - User: {current_user.username} - Error: {str(e)}')

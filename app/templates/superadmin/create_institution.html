@@ -140,6 +140,66 @@
         justify-content: center;
     }
 
+    .color-picker-group {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+    }
+
+    .color-input {
+        width: 60px;
+        height: 40px;
+        border: 2px solid #e5e7eb;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .color-input:hover {
+        transform: scale(1.1);
+    }
+
+    .logo-upload {
+        border: 2px dashed #e5e7eb;
+        border-radius: 12px;
+        padding: 2rem;
+        text-align: center;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+
+    .logo-upload:hover {
+        border-color: #8E2DE2;
+        background: rgba(142, 45, 226, 0.05);
+    }
+
+    .logo-upload.dragover {
+        border-color: #8E2DE2;
+        background: rgba(142, 45, 226, 0.1);
+    }
+
+    .logo-preview {
+        max-width: 150px;
+        max-height: 150px;
+        margin: 1rem auto;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    .admin-info-box {
+        background: rgba(142, 45, 226, 0.05);
+        border: 1px solid rgba(142, 45, 226, 0.2);
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-top: 1rem;
+    }
+
+    .admin-info-box h6 {
+        color: #8E2DE2;
+        font-weight: 700;
+        margin-bottom: 1rem;
+    }
+
     @media (max-width: 768px) {
         .form-container {
             padding: 1.5rem;
@@ -152,6 +212,11 @@
         .btn {
             width: 100%;
         }
+
+        .color-picker-group {
+            flex-direction: column;
+            align-items: stretch;
+        }
     }
 </style>
 {% endblock %}
@@ -159,7 +224,7 @@
 {% block content %}
 <div class="container-fluid">
     <div class="row justify-content-center">
-        <div class="col-lg-8 col-xl-6">
+        <div class="col-lg-10 col-xl-8">
             <div class="form-container">
                 <div class="form-header">
                     <h1>
@@ -169,7 +234,7 @@
                     <p>Complete la información para registrar una nueva institución educativa en el sistema</p>
                 </div>
 
-                <form method="POST" novalidate>
+                <form method="POST" enctype="multipart/form-data" novalidate>
                     <!-- Información Básica -->
                     <div class="form-section">
                         <h3 class="section-title">
@@ -205,6 +270,38 @@
                                            pattern="[A-Z0-9]{3,10}"
                                            required>
                                     <div class="form-text">Código único (3-10 caracteres)</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="academic_year" class="form-label">
+                                        Año Académico <span class="required">*</span>
+                                    </label>
+                                    <input type="number" 
+                                           class="form-control" 
+                                           id="academic_year" 
+                                           name="academic_year" 
+                                           value="{{ current_year }}"
+                                           min="2020" 
+                                           max="2030"
+                                           required>
+                                    <div class="form-text">Año académico actual de la institución</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="type" class="form-label">Tipo de Institución</label>
+                                    <select class="form-control" id="type" name="type">
+                                        <option value="">Seleccionar...</option>
+                                        <option value="colegio">Colegio</option>
+                                        <option value="universidad">Universidad</option>
+                                        <option value="instituto">Instituto Técnico</option>
+                                        <option value="academia">Academia</option>
+                                        <option value="otro">Otro</option>
+                                    </select>
                                 </div>
                             </div>
                         </div>
@@ -317,6 +414,57 @@
                         </div>
                     </div>
 
+                    <!-- Personalización Visual -->
+                    <div class="form-section">
+                        <h3 class="section-title">
+                            <i class="fas fa-palette text-primary"></i>
+                            Personalización Visual
+                        </h3>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="logo" class="form-label">Logo de la Institución</label>
+                                    <div class="logo-upload" onclick="document.getElementById('logo').click()">
+                                        <i class="fas fa-cloud-upload-alt fa-2x text-muted mb-2"></i>
+                                        <p class="mb-0">Haga clic o arrastre el logo aquí</p>
+                                        <small class="text-muted">PNG, JPG hasta 2MB</small>
+                                        <input type="file" 
+                                               id="logo" 
+                                               name="logo" 
+                                               accept="image/*" 
+                                               style="display: none;"
+                                               onchange="previewLogo(this)">
+                                    </div>
+                                    <img id="logo-preview" class="logo-preview" style="display: none;">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="form-label">Colores Institucionales</label>
+                                    <div class="color-picker-group">
+                                        <div>
+                                            <label for="color_primary" class="form-label">Color Primario</label>
+                                            <input type="color" 
+                                                   class="color-input" 
+                                                   id="color_primary" 
+                                                   name="color_primary" 
+                                                   value="#8E2DE2">
+                                        </div>
+                                        <div>
+                                            <label for="color_secondary" class="form-label">Color Secundario</label>
+                                            <input type="color" 
+                                                   class="color-input" 
+                                                   id="color_secondary" 
+                                                   name="color_secondary" 
+                                                   value="#6c757d">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Configuración Inicial -->
                     <div class="form-section">
                         <h3 class="section-title">
@@ -327,25 +475,26 @@
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label for="type" class="form-label">Tipo de Institución</label>
-                                    <select class="form-control" id="type" name="type">
-                                        <option value="">Seleccionar...</option>
-                                        <option value="colegio">Colegio</option>
-                                        <option value="universidad">Universidad</option>
-                                        <option value="instituto">Instituto Técnico</option>
-                                        <option value="academia">Academia</option>
-                                        <option value="otro">Otro</option>
+                                    <label for="status" class="form-label">Estado Inicial</label>
+                                    <select class="form-control" id="status" name="status">
+                                        <option value="active" selected>Activa</option>
+                                        <option value="trial">Período de Prueba</option>
+                                        <option value="inactive">Inactiva</option>
+                                        <option value="pending">Pendiente de Configuración</option>
                                     </select>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label for="status" class="form-label">Estado Inicial</label>
-                                    <select class="form-control" id="status" name="status">
-                                        <option value="active" selected>Activa</option>
-                                        <option value="inactive">Inactiva</option>
-                                        <option value="pending">Pendiente</option>
-                                    </select>
+                                    <label for="max_students" class="form-label">Límite de Estudiantes</label>
+                                    <input type="number" 
+                                           class="form-control" 
+                                           id="max_students" 
+                                           name="max_students" 
+                                           placeholder="500"
+                                           min="1"
+                                           max="10000">
+                                    <div class="form-text">Máximo número de estudiantes permitidos</div>
                                 </div>
                             </div>
                         </div>
@@ -358,11 +507,46 @@
                                        name="create_admin" 
                                        checked>
                                 <label class="form-check-label" for="create_admin">
-                                    Crear automáticamente usuario administrador para esta institución
+                                    <strong>Crear automáticamente usuario administrador para esta institución</strong>
                                 </label>
                             </div>
                             <div class="form-text">
-                                Se enviará un email con las credenciales de acceso al administrador
+                                Se generará un usuario administrador con credenciales temporales
+                            </div>
+                        </div>
+
+                        <div class="admin-info-box" id="admin-info" style="display: none;">
+                            <h6><i class="fas fa-user-shield me-2"></i>Información del Administrador</h6>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="admin_name" class="form-label">Nombre Completo</label>
+                                        <input type="text" 
+                                               class="form-control" 
+                                               id="admin_name" 
+                                               name="admin_name" 
+                                               placeholder="Juan Pérez González">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="admin_email" class="form-label">Email del Administrador</label>
+                                        <input type="email" 
+                                               class="form-control" 
+                                               id="admin_email" 
+                                               name="admin_email" 
+                                               placeholder="admin@colegio.edu.co">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="alert alert-info">
+                                <i class="fas fa-key me-2"></i>
+                                <strong>Se generará automáticamente:</strong>
+                                <ul class="mb-0 mt-2">
+                                    <li>Username: admin_[código_institución]</li>
+                                    <li>Contraseña temporal segura</li>
+                                    <li>Envío de credenciales por email</li>
+                                </ul>
                             </div>
                         </div>
                     </div>
@@ -388,6 +572,10 @@
 {% block extra_js %}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Establecer año actual
+    const currentYear = new Date().getFullYear();
+    document.getElementById('academic_year').value = currentYear;
+
     // Generar código automático basado en el nombre
     const nameInput = document.getElementById('name');
     const codeInput = document.getElementById('code');
@@ -418,6 +606,90 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
     });
+
+    // Sincronizar email institucional con admin email
+    const emailInput = document.getElementById('email');
+    const adminEmailInput = document.getElementById('admin_email');
+    
+    emailInput.addEventListener('input', function() {
+        if (document.getElementById('create_admin').checked && !adminEmailInput.value) {
+            adminEmailInput.value = this.value;
+        }
+    });
+
+    // Toggle admin info section
+    const createAdminCheckbox = document.getElementById('create_admin');
+    const adminInfoBox = document.getElementById('admin-info');
+    
+    createAdminCheckbox.addEventListener('change', function() {
+        if (this.checked) {
+            adminInfoBox.style.display = 'block';
+            // Sync email if not set
+            if (emailInput.value && !adminEmailInput.value) {
+                adminEmailInput.value = emailInput.value;
+            }
+        } else {
+            adminInfoBox.style.display = 'none';
+        }
+    });
+
+    // Trigger initial state
+    if (createAdminCheckbox.checked) {
+        adminInfoBox.style.display = 'block';
+    }
+
+    // Preview logo function
+    window.previewLogo = function(input) {
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const preview = document.getElementById('logo-preview');
+                preview.src = e.target.result;
+                preview.style.display = 'block';
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
+    };
+
+    // Drag and drop for logo
+    const logoUpload = document.querySelector('.logo-upload');
+    
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        logoUpload.addEventListener(eventName, preventDefaults, false);
+    });
+
+    function preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+
+    ['dragenter', 'dragover'].forEach(eventName => {
+        logoUpload.addEventListener(eventName, highlight, false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+        logoUpload.addEventListener(eventName, unhighlight, false);
+    });
+
+    function highlight(e) {
+        logoUpload.classList.add('dragover');
+    }
+
+    function unhighlight(e) {
+        logoUpload.classList.remove('dragover');
+    }
+
+    logoUpload.addEventListener('drop', handleDrop, false);
+
+    function handleDrop(e) {
+        const dt = e.dataTransfer;
+        const files = dt.files;
+        
+        if (files.length > 0) {
+            document.getElementById('logo').files = files;
+            previewLogo(document.getElementById('logo'));
+        }
+    }
 
     // Validación en tiempo real
     const form = document.querySelector('form');
@@ -458,6 +730,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 isFormValid = false;
             }
         });
+
+        // Validar admin info si está marcado
+        if (createAdminCheckbox.checked) {
+            const adminEmailField = document.getElementById('admin_email');
+            if (!adminEmailField.value) {
+                adminEmailField.classList.add('is-invalid');
+                isFormValid = false;
+            }
+        }
         
         if (!isFormValid) {
             e.preventDefault();

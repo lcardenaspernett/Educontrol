@@ -1,0 +1,797 @@
+{% extends "base.html" %}
+
+{% block title %}Gestión de Usuarios - {{ current_user.institution.name }} - {{ super() }}{% endblock %}
+{% block page_title %}Gestión de Usuarios{% endblock %}
+
+{% block extra_css %}
+<style>
+    .users-header {
+        background: linear-gradient(135deg, #8E2DE2 0%, #4A00E0 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 16px;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    }
+
+    .filters-bar {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        margin-bottom: 2rem;
+    }
+
+    .user-card {
+        border: none;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        transition: all 0.3s ease;
+        overflow: hidden;
+    }
+
+    .user-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    }
+
+    .user-avatar {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #8E2DE2 0%, #4A00E0 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: bold;
+        font-size: 1.5rem;
+    }
+
+    .role-badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    .role-admin {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    .role-teacher {
+        background: #dbeafe;
+        color: #1d4ed8;
+    }
+
+    .role-student {
+        background: #dcfce7;
+        color: #166534;
+    }
+
+    .role-parent {
+        background: #fce7f3;
+        color: #be185d;
+    }
+
+    .status-toggle {
+        width: 50px;
+        height: 28px;
+        background: #e5e7eb;
+        border-radius: 20px;
+        position: relative;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border: none;
+    }
+
+    .status-toggle.active {
+        background: #10b981;
+    }
+
+    .status-toggle::before {
+        content: '';
+        position: absolute;
+        top: 2px;
+        left: 2px;
+        width: 24px;
+        height: 24px;
+        background: white;
+        border-radius: 50%;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+
+    .status-toggle.active::before {
+        transform: translateX(22px);
+    }
+
+    .btn-action {
+        background: linear-gradient(135deg, #8E2DE2 0%, #4A00E0 100%);
+        border: none;
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .btn-action:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(142, 45, 226, 0.4);
+        color: white;
+        text-decoration: none;
+    }
+
+    .btn-outline-action {
+        border: 2px solid #8E2DE2;
+        background: transparent;
+        color: #8E2DE2;
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        font-size: 0.9rem;
+    }
+
+    .btn-outline-action:hover {
+        background: #8E2DE2;
+        color: white;
+        text-decoration: none;
+    }
+
+    .action-btn {
+        border: none;
+        background: none;
+        color: #6b7280;
+        padding: 0.5rem;
+        border-radius: 6px;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        font-size: 1rem;
+    }
+
+    .action-btn:hover {
+        background: #f3f4f6;
+        color: #8E2DE2;
+    }
+
+    .action-btn.danger:hover {
+        background: #fef2f2;
+        color: #ef4444;
+    }
+
+    .user-stats {
+        background: #f8fafc;
+        border-radius: 8px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .stat-item {
+        text-align: center;
+    }
+
+    .stat-number {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #8E2DE2;
+        display: block;
+    }
+
+    .stat-label {
+        font-size: 0.75rem;
+        color: #6b7280;
+        text-transform: uppercase;
+        font-weight: 600;
+    }
+
+    .search-results-info {
+        background: #f0f9ff;
+        border: 1px solid #bae6fd;
+        border-radius: 8px;
+        padding: 0.75rem 1rem;
+        margin-bottom: 1rem;
+        color: #075985;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: #6b7280;
+    }
+
+    .empty-state-icon {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+
+    .bulk-actions {
+        background: white;
+        border-radius: 8px;
+        padding: 1rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        margin-bottom: 1rem;
+        display: none;
+    }
+
+    .bulk-actions.show {
+        display: block;
+    }
+
+    .select-all-checkbox {
+        margin-right: 0.5rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Header -->
+<div class="users-header">
+    <div class="row align-items-center">
+        <div class="col-md-8">
+            <h1 class="mb-2">
+                <i class="fas fa-users me-2"></i>
+                Gestión de Usuarios
+            </h1>
+            <p class="mb-0 opacity-75">
+                Administra todos los usuarios de {{ current_user.institution.name }}
+            </p>
+        </div>
+        <div class="col-md-4 text-end">
+            <button class="btn-action" onclick="showCreateUserModal()">
+                <i class="fas fa-plus"></i>
+                Agregar Usuario
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Estadísticas Rápidas -->
+<div class="user-stats">
+    <div class="row text-center">
+        <div class="col-md-3">
+            <div class="stat-item">
+                <span class="stat-number">{{ users.total }}</span>
+                <span class="stat-label">Total</span>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-item">
+                <span class="stat-number">
+                    {{ users.items | selectattr('role', 'equalto', 'student') | list | length }}
+                </span>
+                <span class="stat-label">Estudiantes</span>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-item">
+                <span class="stat-number">
+                    {{ users.items | selectattr('role', 'equalto', 'teacher') | list | length }}
+                </span>
+                <span class="stat-label">Profesores</span>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-item">
+                <span class="stat-number">
+                    {{ users.items | selectattr('is_active', 'equalto', true) | list | length }}
+                </span>
+                <span class="stat-label">Activos</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Filtros y Búsqueda -->
+<div class="filters-bar">
+    <form method="GET" class="row g-3">
+        <div class="col-md-5">
+            <div class="input-group">
+                <span class="input-group-text">
+                    <i class="fas fa-search"></i>
+                </span>
+                <input type="text" 
+                       name="search" 
+                       class="form-control" 
+                       placeholder="Buscar por nombre o email..." 
+                       value="{{ search }}">
+            </div>
+        </div>
+        <div class="col-md-3">
+            <select name="role" class="form-select">
+                <option value="">Todos los roles</option>
+                {% for role in roles %}
+                <option value="{{ role }}" {% if role == role_filter %}selected{% endif %}>
+                    {{ role.title() }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-2">
+            <select name="status" class="form-select">
+                <option value="">Todos</option>
+                <option value="active">Activos</option>
+                <option value="inactive">Inactivos</option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <button type="submit" class="btn btn-outline-primary me-2">
+                <i class="fas fa-filter"></i>
+            </button>
+            <a href="{{ url_for('admin.users') }}" class="btn btn-outline-secondary">
+                <i class="fas fa-times"></i>
+            </a>
+        </div>
+    </form>
+</div>
+
+<!-- Información de Resultados -->
+{% if search or role_filter %}
+<div class="search-results-info">
+    <i class="fas fa-info-circle me-2"></i>
+    Mostrando {{ users.items|length }} de {{ users.total }} usuarios
+    {% if search %}para "<strong>{{ search }}</strong>"{% endif %}
+    {% if role_filter %}con rol "<strong>{{ role_filter.title() }}</strong>"{% endif %}
+</div>
+{% endif %}
+
+<!-- Acciones en Lote -->
+<div class="bulk-actions" id="bulkActions">
+    <div class="d-flex align-items-center justify-content-between">
+        <div>
+            <span id="selectedCount">0</span> usuarios seleccionados
+        </div>
+        <div>
+            <button class="btn btn-sm btn-outline-primary me-2" onclick="activateSelected()">
+                <i class="fas fa-check"></i> Activar
+            </button>
+            <button class="btn btn-sm btn-outline-warning me-2" onclick="deactivateSelected()">
+                <i class="fas fa-pause"></i> Desactivar
+            </button>
+            <button class="btn btn-sm btn-outline-danger" onclick="deleteSelected()">
+                <i class="fas fa-trash"></i> Eliminar
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Lista de Usuarios -->
+<div class="row">
+    {% if users.items %}
+        <!-- Selector de todos -->
+        <div class="col-12 mb-3">
+            <div class="form-check">
+                <input class="form-check-input select-all-checkbox" 
+                       type="checkbox" 
+                       id="selectAll" 
+                       onchange="toggleSelectAll(this)">
+                <label class="form-check-label fw-semibold" for="selectAll">
+                    Seleccionar todos en esta página
+                </label>
+            </div>
+        </div>
+
+        {% for user in users.items %}
+        <div class="col-lg-6 col-xl-4 mb-4">
+            <div class="user-card card h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-start justify-content-between mb-3">
+                        <div class="d-flex align-items-center">
+                            <input class="form-check-input me-3 user-checkbox" 
+                                   type="checkbox" 
+                                   value="{{ user.id }}"
+                                   onchange="updateBulkActions()">
+                            <div class="user-avatar me-3">
+                                {{ user.full_name[0] if user.full_name else user.email[0] }}
+                            </div>
+                            <div>
+                                <h6 class="mb-1">{{ user.full_name or user.email }}</h6>
+                                <small class="text-muted">{{ user.email }}</small>
+                                {% if user.username %}
+                                <br><small class="text-muted">@{{ user.username }}</small>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <span class="role-badge role-{{ user.role }}">
+                            {{ user.role.title() }}
+                        </span>
+                    </div>
+
+                    <div class="row text-center mb-3">
+                        <div class="col-6">
+                            <small class="text-muted d-block">Registro</small>
+                            <strong>{{ user.created_at.strftime('%d/%m/%Y') if user.created_at else 'N/A' }}</strong>
+                        </div>
+                        <div class="col-6">
+                            <small class="text-muted d-block">Último acceso</small>
+                            <strong>{{ user.last_login.strftime('%d/%m') if user.last_login else 'Nunca' }}</strong>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="d-flex align-items-center">
+                            <span class="me-2 small">Estado:</span>
+                            <button class="status-toggle {{ 'active' if user.is_active else '' }}" 
+                                    data-user-id="{{ user.id }}"
+                                    onclick="toggleUserStatus(this)">
+                            </button>
+                        </div>
+                        <div>
+                            <button class="action-btn" 
+                                    data-user-id="{{ user.id }}"
+                                    onclick="editUser(this)" 
+                                    title="Editar">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="action-btn" 
+                                    data-user-id="{{ user.id }}"
+                                    onclick="viewUserDetails(this)" 
+                                    title="Ver detalles">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            {% if user.role != 'admin' or users.items|selectattr('role', 'equalto', 'admin')|list|length > 1 %}
+                            <button class="action-btn danger" 
+                                    data-user-id="{{ user.id }}"
+                                    onclick="deleteUser(this)" 
+                                    title="Eliminar">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="col-12">
+            <div class="empty-state">
+                <div class="empty-state-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <h4>No se encontraron usuarios</h4>
+                <p class="mb-4">
+                    {% if search or role_filter %}
+                        No hay usuarios que coincidan con los filtros aplicados.
+                    {% else %}
+                        Aún no hay usuarios registrados en tu institución.
+                    {% endif %}
+                </p>
+                <button class="btn-action" onclick="showCreateUserModal()">
+                    <i class="fas fa-plus"></i>
+                    Agregar Primer Usuario
+                </button>
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+<!-- Paginación -->
+{% if users.pages > 1 %}
+<nav class="d-flex justify-content-center mt-4">
+    <ul class="pagination">
+        {% if users.has_prev %}
+        <li class="page-item">
+            <a class="page-link" href="{{ url_for('admin.users', page=users.prev_num, search=search, role=role_filter) }}">
+                <i class="fas fa-chevron-left"></i>
+            </a>
+        </li>
+        {% endif %}
+        
+        {% for page_num in users.iter_pages() %}
+            {% if page_num %}
+                {% if page_num != users.page %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ url_for('admin.users', page=page_num, search=search, role=role_filter) }}">
+                        {{ page_num }}
+                    </a>
+                </li>
+                {% else %}
+                <li class="page-item active">
+                    <span class="page-link">{{ page_num }}</span>
+                </li>
+                {% endif %}
+            {% endif %}
+        {% endfor %}
+        
+        {% if users.has_next %}
+        <li class="page-item">
+            <a class="page-link" href="{{ url_for('admin.users', page=users.next_num, search=search, role=role_filter) }}">
+                <i class="fas fa-chevron-right"></i>
+            </a>
+        </li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+
+<!-- Modal para Crear Usuario -->
+<div class="modal fade" id="createUserModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-user-plus me-2"></i>
+                    Agregar Nuevo Usuario
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="createUserForm">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Nombre Completo *</label>
+                            <input type="text" class="form-control" name="full_name" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Email *</label>
+                            <input type="email" class="form-control" name="email" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Rol *</label>
+                            <select class="form-select" name="role" required>
+                                <option value="">Seleccionar rol...</option>
+                                <option value="student">Estudiante</option>
+                                <option value="teacher">Profesor</option>
+                                <option value="admin">Administrador</option>
+                                <option value="parent">Padre/Madre</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Contraseña Temporal *</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" name="password" id="tempPassword" required>
+                                <button class="btn btn-outline-secondary" type="button" onclick="generatePassword()">
+                                    <i class="fas fa-random"></i>
+                                </button>
+                            </div>
+                            <small class="text-muted">El usuario deberá cambiarla en su primer acceso</small>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn-action" onclick="createUser()">
+                    <i class="fas fa-save"></i>
+                    Crear Usuario
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Variables globales
+let selectedUsers = [];
+
+// Función para mostrar el modal de crear usuario
+function showCreateUserModal() {
+    const modal = new bootstrap.Modal(document.getElementById('createUserModal'));
+    modal.show();
+    generatePassword(); // Auto-generar contraseña
+}
+
+// Función para generar contraseña aleatoria
+function generatePassword() {
+    const chars = 'ABCDEFGHJKMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789';
+    let password = '';
+    for (let i = 0; i < 8; i++) {
+        password += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    document.getElementById('tempPassword').value = password;
+}
+
+// Función para crear usuario
+function createUser() {
+    const form = document.getElementById('createUserForm');
+    const formData = new FormData(form);
+    
+    // Validar campos requeridos
+    const requiredFields = ['full_name', 'email', 'role', 'password'];
+    let isValid = true;
+    
+    requiredFields.forEach(field => {
+        const input = form.querySelector(`[name="${field}"]`);
+        if (!formData.get(field)) {
+            isValid = false;
+            input.classList.add('is-invalid');
+        } else {
+            input.classList.remove('is-invalid');
+        }
+    });
+    
+    if (!isValid) {
+        showNotification('Por favor complete todos los campos requeridos', 'warning');
+        return;
+    }
+    
+    // Preparar datos para envío
+    const userData = {
+        full_name: formData.get('full_name'),
+        email: formData.get('email'),
+        role: formData.get('role'),
+        password: formData.get('password')
+    };
+    
+    // Enviar solicitud al servidor
+    fetch('/admin/users/create', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(userData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showNotification(data.message, 'success');
+            bootstrap.Modal.getInstance(document.getElementById('createUserModal')).hide();
+            form.reset();
+            
+            // Recargar página para mostrar el nuevo usuario
+            setTimeout(() => {
+                window.location.reload();
+            }, 1500);
+        } else {
+            showNotification(data.message, 'danger');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showNotification('Error al crear usuario', 'danger');
+    });
+}
+
+// Función para toggle de estado de usuario
+function toggleUserStatus(element) {
+    const userId = element.getAttribute('data-user-id');
+    
+    fetch(`/admin/users/${userId}/toggle_status`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            element.classList.toggle('active');
+            showNotification(data.message, 'success');
+        } else {
+            showNotification(data.message, 'danger');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showNotification('Error al cambiar estado', 'danger');
+    });
+}
+
+// Función para editar usuario
+function editUser(element) {
+    const userId = element.getAttribute('data-user-id');
+    showNotification('Función de edición en desarrollo', 'info');
+}
+
+// Función para ver detalles del usuario
+function viewUserDetails(element) {
+    const userId = element.getAttribute('data-user-id');
+    showNotification('Abriendo detalles del usuario...', 'info');
+}
+
+// Función para eliminar usuario
+function deleteUser(element) {
+    const userId = element.getAttribute('data-user-id');
+    
+    if (confirm('¿Está seguro de eliminar este usuario?\n\nEsta acción no se puede deshacer.')) {
+        showNotification('Función de eliminación en desarrollo', 'warning');
+    }
+}
+
+// Funciones de selección masiva
+function toggleSelectAll(checkbox) {
+    const userCheckboxes = document.querySelectorAll('.user-checkbox');
+    userCheckboxes.forEach(cb => {
+        cb.checked = checkbox.checked;
+    });
+    updateBulkActions();
+}
+
+function updateBulkActions() {
+    const userCheckboxes = document.querySelectorAll('.user-checkbox');
+    const checkedBoxes = document.querySelectorAll('.user-checkbox:checked');
+    
+    selectedUsers = Array.from(checkedBoxes).map(cb => cb.value);
+    
+    const bulkActions = document.getElementById('bulkActions');
+    const selectedCount = document.getElementById('selectedCount');
+    
+    if (selectedUsers.length > 0) {
+        bulkActions.classList.add('show');
+        selectedCount.textContent = selectedUsers.length;
+    } else {
+        bulkActions.classList.remove('show');
+    }
+    
+    // Actualizar checkbox de "seleccionar todos"
+    const selectAllCheckbox = document.getElementById('selectAll');
+    if (checkedBoxes.length === userCheckboxes.length && userCheckboxes.length > 0) {
+        selectAllCheckbox.checked = true;
+        selectAllCheckbox.indeterminate = false;
+    } else if (checkedBoxes.length > 0) {
+        selectAllCheckbox.checked = false;
+        selectAllCheckbox.indeterminate = true;
+    } else {
+        selectAllCheckbox.checked = false;
+        selectAllCheckbox.indeterminate = false;
+    }
+}
+
+// Funciones de acciones en lote
+function activateSelected() {
+    if (selectedUsers.length === 0) return;
+    showNotification(`Activando ${selectedUsers.length} usuarios...`, 'info');
+}
+
+function deactivateSelected() {
+    if (selectedUsers.length === 0) return;
+    showNotification(`Desactivando ${selectedUsers.length} usuarios...`, 'info');
+}
+
+function deleteSelected() {
+    if (selectedUsers.length === 0) return;
+    
+    if (confirm(`¿Está seguro de eliminar ${selectedUsers.length} usuarios?\n\nEsta acción no se puede deshacer.`)) {
+        showNotification('Función de eliminación masiva en desarrollo', 'warning');
+    }
+}
+
+// Función para mostrar notificaciones
+function showNotification(message, type) {
+    const notification = document.createElement('div');
+    notification.style.cssText = 
+        'position: fixed; top: 20px; right: 20px; z-index: 9999; ' +
+        'padding: 1rem 1.5rem; border-radius: 8px; color: white; ' +
+        'font-weight: 500; box-shadow: 0 4px 20px rgba(0,0,0,0.15); ' +
+        'transform: translateX(100%); transition: all 0.3s ease;';
+    
+    const colors = {
+        'success': '#10b981',
+        'info': '#3b82f6',
+        'warning': '#f59e0b',
+        'danger': '#ef4444'
+    };
+    
+    notification.style.backgroundColor = colors[type] || colors.info;
+    notification.textContent = message;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => notification.style.transform = 'translateX(0)', 100);
+    setTimeout(() => {
+        notification.style.transform = 'translateX(100%)';
+        setTimeout(() => notification.remove(), 300);
+    }, 3000);
+}
+
+// Inicialización
+document.addEventListener('DOMContentLoaded', function() {
+    // Configurar eventos de checkbox
+    const userCheckboxes = document.querySelectorAll('.user-checkbox');
+    userCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', updateBulkActions);
+    });
+});
+</script>
+{% endblock %}
