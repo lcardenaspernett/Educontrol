@@ -607,7 +607,7 @@ def institutions():
 @login_required
 @superadmin_required
 def create_institution():
-    """Crear nueva institución"""
+    """Crear nueva institución con sistema de módulos integrado"""
     if request.method == 'POST':
         try:
             # Obtener datos del formulario
@@ -617,7 +617,7 @@ def create_institution():
             
             # Ubicación
             city = request.form.get('city', '').strip()
-            state = request.form.get('state', '').strip()
+            department = request.form.get('department', '').strip()  
             address = request.form.get('address', '').strip()
             
             # Contacto
@@ -625,14 +625,47 @@ def create_institution():
             email = request.form.get('email', '').strip()
             website = request.form.get('website', '').strip()
             
-            # Configuración
+            # NUEVOS CAMPOS DEL FORMULARIO
+            nit = request.form.get('nit', '').strip()
+            codigo_dane = request.form.get('codigo_dane', '').strip()
+            academic_year = request.form.get('academic_year', 2025, type=int)
             institution_type = request.form.get('type', '').strip()
-            status = request.form.get('status', 'active').strip()
+            estimated_students = request.form.get('estimated_students', type=int)
+            
+            # Configuración académica
+            num_sedes = request.form.get('num_sedes', '1').strip()
+            jornada = request.form.get('jornada', '').strip()
+            niveles = request.form.getlist('niveles[]')  
+            
+            # Datos del rector
+            rector_name = request.form.get('rector_name', '').strip()
+            rector_email = request.form.get('rector_email', '').strip()
+            rector_phone = request.form.get('rector_phone', '').strip()
+            rector_document = request.form.get('rector_document', '').strip()
+            
+            # Configuración del sistema
+            status = request.form.get('status', 'trial').strip()
+            max_students = request.form.get('max_students', type=int)
+            timezone = request.form.get('timezone', 'America/Bogota').strip()
+            language = request.form.get('language', 'es').strip()
+            
+            # MÓDULOS SELECCIONADOS
+            selected_modules = request.form.getlist('modules[]')
+            
+            # Configuración de administrador
             create_admin = request.form.get('create_admin') == 'on'
+            admin_name = request.form.get('admin_name', '').strip()
+            admin_email = request.form.get('admin_email', '').strip()
+            admin_phone = request.form.get('admin_phone', '').strip()
+            admin_document = request.form.get('admin_document', '').strip()
             
             # Validaciones básicas
             if not name or not code or not city:
                 flash('Los campos Nombre, Código y Ciudad son obligatorios', 'error')
+                return render_template('superadmin/create_institution.html')
+            
+            if not niveles:
+                flash('Debe seleccionar al menos un nivel educativo', 'error')
                 return render_template('superadmin/create_institution.html')
             
             # Verificar que el código no exista
@@ -640,19 +673,20 @@ def create_institution():
                 flash(f'Ya existe una institución con el código "{code}"', 'error')
                 return render_template('superadmin/create_institution.html')
             
-            # Crear institución
+            # CREAR INSTITUCIÓN CON DATOS COMPLETOS
             institution_data = {
                 'name': name,
                 'code': code,
                 'city': city,
-                'is_active': status == 'active'
+                'is_active': status == 'active',
+                'academic_year': academic_year
             }
             
             # Agregar campos opcionales si no están vacíos
             if description:
                 institution_data['description'] = description
-            if state:
-                institution_data['state'] = state
+            if department and hasattr(Institution, 'department'):
+                institution_data['department'] = department
             if address:
                 institution_data['address'] = address
             if phone:
@@ -662,58 +696,236 @@ def create_institution():
             if website:
                 institution_data['website'] = website
             
-            # Agregar campos adicionales si existen en el modelo
+            # Campos adicionales según el modelo
+            if hasattr(Institution, 'nit') and nit:
+                institution_data['nit'] = nit
+            if hasattr(Institution, 'codigo_dane') and codigo_dane:
+                institution_data['codigo_dane'] = codigo_dane
             if hasattr(Institution, 'type') and institution_type:
                 institution_data['type'] = institution_type
             if hasattr(Institution, 'status'):
                 institution_data['status'] = status
             
+            # CONFIGURACIONES ADICIONALES COMO JSON
+            additional_settings = {
+                'estimated_students': estimated_students,
+                'num_sedes': num_sedes,
+                'jornada': jornada,
+                'niveles_educativos': niveles,
+                'rector': {
+                    'name': rector_name,
+                    'email': rector_email,
+                    'phone': rector_phone,
+                    'document': rector_document
+                },
+                'system_config': {
+                    'max_students': max_students,
+                    'timezone': timezone,
+                    'language': language
+                }
+            }
+            
             institution = Institution(**institution_data)
+            
+            # Guardar configuraciones adicionales en JSON
+            if hasattr(Institution, 'settings_json'):
+                institution.set_settings(additional_settings)
+            
             db.session.add(institution)
             db.session.flush()  # Para obtener el ID
             
+            # ACTIVAR MÓDULOS USANDO EL MODULE SERVICE
+            modules_result = activate_institution_modules(institution.id, selected_modules)
+            
             # Crear usuario administrador si se solicita
-            if create_admin and email:
-                admin_username = f"admin_{code.lower()}"
-                admin_password = generate_random_password()
+            admin_created = False
+            admin_credentials = None
+            
+            if create_admin and admin_email and admin_name:
+                admin_result = create_institution_admin(
+                    institution.id, 
+                    admin_name, 
+                    admin_email, 
+                    code, 
+                    admin_phone, 
+                    admin_document
+                )
                 
-                admin_data = {
-                    'username': admin_username,
-                    'email': email,
-                    'role': 'admin',
-                    'institution_id': institution.id,
-                    'is_active': True
-                }
-                
-                # Agregar nombres según el modelo
-                if hasattr(User, 'first_name'):
-                    admin_data['first_name'] = "Administrador"
-                    admin_data['last_name'] = name
-                elif hasattr(User, 'full_name'):
-                    admin_data['full_name'] = f"Administrador {name}"
-                
-                admin_user = User(**admin_data)
-                admin_user.set_password(admin_password)
-                
-                db.session.add(admin_user)
-                
-                # Mostrar credenciales (en producción, enviar por email)
-                flash(f'Usuario administrador creado: {admin_username} / {admin_password}', 'info')
+                if admin_result['success']:
+                    admin_created = True
+                    admin_credentials = admin_result['credentials']
+                else:
+                    flash(f'Advertencia: {admin_result["error"]}', 'warning')
             
             db.session.commit()
             
-            security_logger.info(f'INSTITUTION_CREATED - Institution: {name} ({code}) - By: {current_user.username} - IP: {request.remote_addr}')
-            flash(f'Institución "{name}" creada exitosamente', 'success')
+            # LOGGING DETALLADO DE SEGURIDAD
+            security_logger.info(
+                f'INSTITUTION_CREATED - Institution: {name} ({code}) - '
+                f'Modules: {len(selected_modules)} - Admin: {admin_created} - '
+                f'By: {current_user.username} - IP: {request.remote_addr}'
+            )
+            
+            # MENSAJES DE ÉXITO CON DETALLES
+            success_message = f'Institución "{name}" creada exitosamente'
+            
+            if modules_result['activated_count'] > 0:
+                success_message += f' con {modules_result["activated_count"]} módulos activados'
+            
+            if admin_created and admin_credentials:
+                success_message += f'. Usuario admin: {admin_credentials["username"]}'
+                flash(f'Credenciales del administrador: {admin_credentials["username"]} / {admin_credentials["password"]}', 'info')
+            
+            flash(success_message, 'success')
+            
+            # MOSTRAR RESUMEN DE MÓDULOS SI HAY ERRORES
+            if modules_result.get('errors'):
+                for error in modules_result['errors']:
+                    flash(f'Módulo: {error}', 'warning')
             
             return redirect(url_for('superadmin.institutions'))
             
         except Exception as e:
             db.session.rollback()
-            security_logger.error(f'INSTITUTION_CREATE_ERROR - User: {current_user.username} - Error: {str(e)}')
+            security_logger.error(
+                f'INSTITUTION_CREATE_ERROR - User: {current_user.username} - '
+                f'Error: {str(e)} - IP: {request.remote_addr}'
+            )
             flash('Error al crear la institución. Intente nuevamente.', 'error')
             return render_template('superadmin/create_institution.html')
     
+    # GET request - mostrar formulario
     return render_template('superadmin/create_institution.html')
+
+# FUNCIÓN AUXILIAR: ACTIVAR MÓDULOS
+def activate_institution_modules(institution_id, selected_module_codes):
+    """
+    Activa módulos para una institución usando el ModuleService
+    """
+    try:
+        from app.services.module_service import ModuleService
+        
+        # 1. Activar módulos core automáticamente
+        core_result = ModuleService.activate_core_modules_for_institution(institution_id)
+        
+        activated_count = 0
+        errors = []
+        
+        if core_result['success']:
+            activated_count += len(core_result.get('activated_modules', []))
+        else:
+            errors.append(f"Error activando módulos core: {core_result.get('error', 'Error desconocido')}")
+        
+        # 2. Activar módulos seleccionados (no-core)
+        if selected_module_codes:
+            # Filtrar módulos que no sean core para evitar duplicados
+            from app.models.module import Module
+            non_core_modules = Module.query.filter(
+                Module.code.in_(selected_module_codes),
+                Module.is_core == False
+            ).all()
+            
+            non_core_codes = [m.code for m in non_core_modules]
+            
+            if non_core_codes:
+                modules_result = ModuleService.activate_modules_for_institution(
+                    institution_id, 
+                    non_core_codes
+                )
+                
+                if modules_result['success']:
+                    activated_count += len(modules_result.get('activated_modules', []))
+                    if modules_result.get('errors'):
+                        errors.extend(modules_result['errors'])
+                else:
+                    errors.append(f"Error activando módulos seleccionados: {modules_result.get('error', 'Error desconocido')}")
+        
+        return {
+            'success': True,
+            'activated_count': activated_count,
+            'errors': errors if errors else None
+        }
+        
+    except Exception as e:
+        return {
+            'success': False,
+            'activated_count': 0,
+            'errors': [f'Error interno: {str(e)}']
+        }
+
+# FUNCIÓN AUXILIAR: CREAR ADMINISTRADOR
+def create_institution_admin(institution_id, admin_name, admin_email, institution_code, admin_phone=None, admin_document=None):
+    """
+    Crea un usuario administrador para la institución
+    """
+    try:
+        from app.models.user import User
+        
+        # Verificar que el email no esté en uso
+        existing_user = User.query.filter_by(email=admin_email).first()
+        if existing_user:
+            return {
+                'success': False,
+                'error': f'El email {admin_email} ya está registrado en el sistema'
+            }
+        
+        # Generar credenciales
+        admin_username = f"admin_{institution_code.lower()}"
+        admin_password = generate_random_password(12)
+        
+        # Verificar que el username no esté en uso
+        existing_username = User.query.filter_by(username=admin_username).first()
+        if existing_username:
+            # Agregar número al final si ya existe
+            counter = 1
+            while User.query.filter_by(username=f"{admin_username}_{counter}").first():
+                counter += 1
+            admin_username = f"{admin_username}_{counter}"
+        
+        # Crear usuario administrador
+        admin_data = {
+            'email': admin_email,
+            'username': admin_username,
+            'role': 'admin',
+            'institution_id': institution_id,
+            'is_active': True
+        }
+        
+        # Agregar nombres según el modelo
+        if hasattr(User, 'first_name'):
+            # Si el modelo tiene first_name y last_name
+            name_parts = admin_name.split(' ', 1)
+            admin_data['first_name'] = name_parts[0]
+            admin_data['last_name'] = name_parts[1] if len(name_parts) > 1 else ''
+        elif hasattr(User, 'full_name'):
+            # Si el modelo tiene full_name
+            admin_data['full_name'] = admin_name
+        
+        # Campos adicionales
+        if admin_phone and hasattr(User, 'phone'):
+            admin_data['phone'] = admin_phone
+        if admin_document and hasattr(User, 'document'):
+            admin_data['document'] = admin_document
+        
+        admin_user = User(**admin_data)
+        admin_user.set_password(admin_password)
+        
+        db.session.add(admin_user)
+        
+        return {
+            'success': True,
+            'credentials': {
+                'username': admin_username,
+                'password': admin_password,
+                'email': admin_email
+            }
+        }
+        
+    except Exception as e:
+        return {
+            'success': False,
+            'error': f'Error creando administrador: {str(e)}'
+        }
 
 @superadmin_bp.route('/institutions/<int:institution_id>/toggle_status', methods=['POST'])
 @login_required
@@ -765,6 +977,210 @@ def settings():
         security_logger.error(f'SETTINGS_ERROR - User: {current_user.username} - Error: {str(e)}')
         flash('Error al cargar configuración', 'error')
         return redirect(url_for('superadmin.dashboard'))
+# VERIFICACIÓN: Endpoint para revisar detalles completos de la institución
+@superadmin_bp.route('/institutions/<int:institution_id>/details')
+@login_required
+@superadmin_required
+def institution_details(institution_id):
+    """Mostrar detalles completos de una institución con módulos y configuración"""
+    try:
+        # Obtener la institución
+        institution = Institution.query.get_or_404(institution_id)
+        
+        # Obtener estado de módulos usando ModuleService
+        from app.services.module_service import ModuleService
+        modules_status = ModuleService.get_institution_modules_status(institution_id)
+        
+        # Obtener usuarios de la institución
+        from app.models.user import User
+        institution_users = User.query.filter_by(institution_id=institution_id).all()
+        
+        # Separar por roles
+        users_by_role = {}
+        for user in institution_users:
+            role = user.role
+            if role not in users_by_role:
+                users_by_role[role] = []
+            users_by_role[role].append({
+                'id': user.id,
+                'username': getattr(user, 'username', 'N/A'),
+                'email': user.email,
+                'full_name': getattr(user, 'full_name', f"{getattr(user, 'first_name', '')} {getattr(user, 'last_name', '')}".strip()),
+                'is_active': user.is_active,
+                'created_at': user.created_at.strftime('%d/%m/%Y %H:%M') if hasattr(user, 'created_at') and user.created_at else 'N/A'
+            })
+        
+        # Obtener configuración adicional si existe
+        additional_settings = {}
+        if hasattr(institution, 'get_settings'):
+            additional_settings = institution.get_settings() or {}
+        elif hasattr(institution, 'settings_json') and institution.settings_json:
+            import json
+            try:
+                additional_settings = json.loads(institution.settings_json)
+            except:
+                additional_settings = {}
+        
+        # Estadísticas rápidas
+        stats = {
+            'total_modules': 0,
+            'active_modules': 0,
+            'trial_modules': 0,
+            'subscribed_modules': 0,
+            'total_users': len(institution_users),
+            'admin_users': len(users_by_role.get('admin', [])),
+            'other_users': len(institution_users) - len(users_by_role.get('admin', []))
+        }
+        
+        if modules_status['success']:
+            modules = modules_status['modules']
+            stats['total_modules'] = len(modules)
+            stats['active_modules'] = len([m for m in modules if m['is_active']])
+            stats['trial_modules'] = len([m for m in modules if m['is_active'] and m.get('trial_ends_at')])
+            stats['subscribed_modules'] = len([m for m in modules if m['is_active'] and not m.get('trial_ends_at')])
+        
+        # Log de acceso
+        security_logger.info(
+            f'INSTITUTION_DETAILS_ACCESS - Institution: {institution.name} ({institution.code}) - '
+            f'User: {current_user.username} - IP: {request.remote_addr}'
+        )
+        
+        return render_template('superadmin/institution_details.html',
+                             institution=institution,
+                             modules_status=modules_status,
+                             users_by_role=users_by_role,
+                             additional_settings=additional_settings,
+                             stats=stats)
+        
+    except Exception as e:
+        security_logger.error(
+            f'INSTITUTION_DETAILS_ERROR - ID: {institution_id} - '
+            f'User: {current_user.username} - Error: {str(e)} - IP: {request.remote_addr}'
+        )
+        flash('Error al obtener detalles de la institución', 'error')
+        return redirect(url_for('superadmin.institutions'))
+
+@superadmin_bp.route('/institutions/<int:institution_id>/modules/status')
+@login_required
+@superadmin_required
+def institution_modules_status_api(institution_id):
+    """API para obtener el estado actual de módulos de una institución"""
+    try:
+        # Verificar que la institución existe
+        institution = Institution.query.get_or_404(institution_id)
+        
+        # Obtener estado de módulos
+        from app.services.module_service import ModuleService
+        modules_status = ModuleService.get_institution_modules_status(institution_id)
+        
+        if modules_status['success']:
+            # Agregar información adicional útil
+            modules = modules_status['modules']
+            
+            # Contar por estado
+            status_counts = {
+                'active': 0,
+                'inactive': 0,
+                'trial': 0,
+                'expired': 0
+            }
+            
+            # Información detallada por módulo
+            detailed_modules = []
+            
+            from datetime import datetime, timezone
+            now = datetime.now(timezone.utc)
+            
+            for module_info in modules:
+                module = module_info['module']
+                is_active = module_info['is_active']
+                trial_ends_at = module_info.get('trial_ends_at')
+                
+                # Determinar estado específico
+                if not is_active:
+                    status = 'inactive'
+                    status_counts['inactive'] += 1
+                elif trial_ends_at:
+                    trial_end = datetime.fromisoformat(trial_ends_at.replace('Z', '+00:00'))
+                    if trial_end > now:
+                        status = 'trial'
+                        status_counts['trial'] += 1
+                    else:
+                        status = 'expired'
+                        status_counts['expired'] += 1
+                else:
+                    status = 'active'
+                    status_counts['active'] += 1
+                
+                detailed_modules.append({
+                    'code': module['code'],
+                    'name': module['name'],
+                    'category': module['category'],
+                    'is_active': is_active,
+                    'status': status,
+                    'trial_ends_at': trial_ends_at,
+                    'monthly_price': module.get('monthly_price', 0),
+                    'can_use': module_info['can_use']
+                })
+            
+            return jsonify({
+                'success': True,
+                'institution': {
+                    'id': institution.id,
+                    'name': institution.name,
+                    'code': institution.code
+                },
+                'modules': detailed_modules,
+                'status_counts': status_counts,
+                'total_modules': len(modules)
+            })
+        else:
+            return jsonify({
+                'success': False,
+                'error': modules_status.get('error', 'Error desconocido')
+            }), 500
+            
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+# Agregar este endpoint al archivo app/routes/superadmin.py
+# Insertar después de la ruta /settings y antes de las rutas de exportación
+
+@superadmin_bp.route('/api/modules/available')
+@login_required
+@superadmin_required
+def api_available_modules():
+    """API para obtener módulos disponibles para selección en formularios"""
+    try:
+        # Usar el ModuleService para obtener módulos disponibles
+        from app.services.module_service import ModuleService
+        grouped_modules = ModuleService.get_available_modules_for_selection()
+        
+        # Agregar información adicional útil para el formulario
+        response_data = {
+            'success': True,
+            'modules_by_category': grouped_modules,
+            'total_modules': sum(len(modules) for modules in grouped_modules.values()),
+            'categories': list(grouped_modules.keys())
+        }
+        
+        # Log del acceso para seguridad
+        security_logger.info(f'MODULES_API_ACCESS - User: {current_user.username} - IP: {request.remote_addr}')
+        
+        return jsonify(response_data)
+        
+    except Exception as e:
+        security_logger.error(f'MODULES_API_ERROR - User: {current_user.username} - Error: {str(e)}')
+        return jsonify({
+            'success': False,
+            'error': 'Error interno al obtener módulos',
+            'modules_by_category': {},
+            'total_modules': 0,
+            'categories': []
+        }), 500        
 
 @superadmin_bp.route('/api/stats')
 @login_required
@@ -787,10 +1203,142 @@ def api_stats():
         }
         
         return jsonify(stats)
-    
     except Exception as e:
-        security_logger.error(f'API_STATS_ERROR - User: {current_user.username} - Error: {str(e)}')
-        return jsonify({'error': 'Error interno del servidor'}), 500
+        security_logger.error(f'LOCATION_AUTOCOMPLETE_ERROR - User: {current_user.username} - Error: {str(e)}')
+        return jsonify({
+            'found': False,
+            'message': 'Error interno al buscar ubicación'
+        }), 500
+
+
+@superadmin_bp.route('/api/validate/logo', methods=['POST'])
+@login_required
+@superadmin_required
+def validate_logo_upload():
+    """Validar logo antes de subir"""
+    try:
+        if 'logo' not in request.files:
+            return jsonify({
+                'valid': False,
+                'message': 'No se recibió archivo'
+            })
+        
+        file = request.files['logo']
+        if not file or not file.filename:
+            return jsonify({
+                'valid': False,
+                'message': 'Archivo vacío'
+            })
+        
+        # Validar extensión
+        allowed_extensions = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
+        file_extension = file.filename.rsplit('.', 1)[1].lower() if '.' in file.filename else ''
+        
+        if file_extension not in allowed_extensions:
+            return jsonify({
+                'valid': False,
+                'message': f'Formato no válido. Use: {", ".join(allowed_extensions).upper()}'
+            })
+        
+        # Validar tamaño
+        file.seek(0, 2)  # Ir al final del archivo
+        file_size = file.tell()
+        file.seek(0)  # Volver al inicio
+        
+        max_size = 2 * 1024 * 1024  # 2MB
+        if file_size > max_size:
+            return jsonify({
+                'valid': False,
+                'message': f'Archivo muy grande ({file_size // 1024}KB). Máximo: 2MB'
+            })
+        
+        # Validar que realmente sea una imagen
+        try:
+            from PIL import Image
+            img = Image.open(file)
+            width, height = img.size
+            
+            # Validar dimensiones mínimas
+            min_size = 100
+            if width < min_size or height < min_size:
+                return jsonify({
+                    'valid': False,
+                    'message': f'Imagen muy pequeña ({width}x{height}px). Mínimo: {min_size}x{min_size}px'
+                })
+            
+            # Recomendaciones
+            recommendations = []
+            if width < 200 or height < 200:
+                recommendations.append('Recomendado: mínimo 200x200px para mejor calidad')
+            
+            if width != height:
+                recommendations.append('Recomendado: imagen cuadrada para mejor visualización')
+            
+            if width > 1000 or height > 1000:
+                recommendations.append('Imagen será redimensionada automáticamente')
+            
+            return jsonify({
+                'valid': True,
+                'message': 'Logo válido',
+                'dimensions': f'{width}x{height}px',
+                'size': f'{file_size // 1024}KB',
+                'format': img.format,
+                'recommendations': recommendations
+            })
+            
+        except ImportError:
+            # Fallback si PIL no está disponible
+            return jsonify({
+                'valid': True,
+                'message': 'Logo válido (validación básica)',
+                'size': f'{file_size // 1024}KB',
+                'format': file_extension.upper()
+            })
+            
+        except Exception as img_error:
+            return jsonify({
+                'valid': False,
+                'message': 'Archivo no es una imagen válida'
+            })
+        
+    except Exception as e:
+        security_logger.error(f'LOGO_VALIDATION_ERROR - User: {current_user.username} - Error: {str(e)}')
+        return jsonify({
+            'valid': False,
+            'message': 'Error interno al validar logo'
+        }), 500
+
+
+@superadmin_bp.route('/api/generate/credentials/<institution_code>')
+@login_required
+@superadmin_required
+def generate_admin_credentials(institution_code):
+    """Generar credenciales de administrador para vista previa"""
+    try:
+        code = institution_code.upper().strip()
+        
+        # Generar username y password de ejemplo
+        username = f"admin_{code.lower()}"
+        password = generate_random_password(12)
+        
+        return jsonify({
+            'username': username,
+            'password': password,
+            'email_template': f"admin@{code.lower()}.edu.co",
+            'login_url': request.url_root + 'login',
+            'instructions': [
+                'Enviar credenciales por email seguro',
+                'Usuario debe cambiar contraseña al primer ingreso',
+                'Activar autenticación de dos factores (recomendado)'
+            ]
+        })
+        
+    except Exception as e:
+        security_logger.error(f'CREDENTIALS_GENERATION_ERROR - User: {current_user.username} - Error: {str(e)}')
+        return jsonify({
+            'error': 'Error interno al generar credenciales'
+        }), 500
+
 
 # ================== RUTAS DE EXPORTACIÓN ==================
 

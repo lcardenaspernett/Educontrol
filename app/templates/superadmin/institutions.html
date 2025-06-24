@@ -250,12 +250,11 @@
 
                     <div class="card-footer bg-white border-0 d-flex justify-content-between">
                         <div>
-                            <button class="action-btn" 
-                                    data-institution-id="{{ institution.id }}"
-                                    onclick="viewInstitutionDetails(this)" 
-                                    title="Ver detalles">
+                            <a href="{{ url_for('superadmin.institution_details', institution_id=institution.id) }}" 
+                               class="action-btn text-primary" 
+                               title="Ver detalles">
                                 <i class="fas fa-eye"></i>
-                            </button>
+                            </a>
                             <button class="action-btn" 
                                     data-institution-id="{{ institution.id }}"
                                     onclick="editInstitutionData(this)" 
@@ -268,13 +267,11 @@
                                     title="Gestionar usuarios">
                                 <i class="fas fa-users"></i>
                             </button>
-                        </div>
-                        <div>
                             <button class="action-btn" 
                                     data-institution-id="{{ institution.id }}"
                                     onclick="toggleInstitutionActiveStatus(this)" 
-                                    title="Cambiar estado">
-                                <i class="fas fa-power-off"></i>
+                                    title="{{ 'Desactivar' if institution.is_active else 'Activar' }}">
+                                <i class="fas fa-{{ 'toggle-on' if institution.is_active else 'toggle-off' }}"></i>
                             </button>
                             <button class="action-btn text-danger" 
                                     data-institution-id="{{ institution.id }}"
