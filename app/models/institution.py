@@ -84,3 +84,77 @@ class Institution(db.Model):
             'total_teachers': self.total_teachers,
             'total_admins': self.total_admins
         }
+
+    # NUEVOS MÉTODOS PARA MÓDULOS (agregados al final)
+    def get_modules(self):
+        """Obtiene todos los módulos de la institución"""
+        # Importación local para evitar importación circular
+        from app.models.module import Module
+        from app.models.institution_module import InstitutionModule
+        
+        return db.session.query(Module).join(InstitutionModule).filter(
+            InstitutionModule.institution_id == self.id
+        ).all()
+
+    def get_active_modules(self):
+        """Obtiene módulos activos"""
+        from app.models.module import Module
+        from app.models.institution_module import InstitutionModule
+        
+        return db.session.query(Module).join(InstitutionModule).filter(
+            InstitutionModule.institution_id == self.id,
+            InstitutionModule.is_active == True
+        ).all()
+
+    def has_module(self, module_code):
+        """Verifica si tiene un módulo específico activo"""
+        from app.models.module import Module
+        from app.models.institution_module import InstitutionModule
+        
+        return db.session.query(InstitutionModule).join(Module).filter(
+            InstitutionModule.institution_id == self.id,
+            Module.code == module_code,
+            InstitutionModule.is_active == True
+        ).first() is not None
+
+    def can_use_module(self, module_code):
+        """Verifica si puede usar un módulo (activo y no expirado)"""
+        from app.models.module import Module
+        from app.models.institution_module import InstitutionModule
+        
+        inst_module = db.session.query(InstitutionModule).join(Module).filter(
+            InstitutionModule.institution_id == self.id,
+            Module.code == module_code,
+            InstitutionModule.is_active == True
+        ).first()
+        
+        if not inst_module:
+            return False
+        
+        # Si es core, siempre disponible
+        if inst_module.module.is_core:
+            return True
+        
+        # Verificar trial o suscripción
+        return inst_module.is_in_trial or inst_module.is_subscribed
+
+    def get_available_roles(self):
+        """Obtiene roles disponibles basados en módulos activos"""
+        roles = set()
+        
+        for module in self.get_active_modules():
+            roles.update(module.included_roles)
+        
+        return list(roles)
+
+    def get_module_status(self, module_code):
+        """Obtiene el estado de un módulo específico"""
+        from app.models.module import Module
+        from app.models.institution_module import InstitutionModule
+        
+        inst_module = db.session.query(InstitutionModule).join(Module).filter(
+            InstitutionModule.institution_id == self.id,
+            Module.code == module_code
+        ).first()
+        
+        return inst_module.status if inst_module else 'not_installed'

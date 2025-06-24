@@ -1,0 +1,487 @@
+<!-- Crear archivo: app/templates/superadmin/institution_details.html -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalles: {{ institution.name }} - EduControl</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .info-card {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+            margin-bottom: 1.5rem;
+        }
+        
+        .info-card .card-header {
+            background: linear-gradient(135deg, #8E2DE2 0%, #4A00E0 100%);
+            color: white;
+            border-radius: 12px 12px 0 0 !important;
+            font-weight: 600;
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+        
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            display: block;
+        }
+        
+        .module-card {
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 0.5rem;
+            transition: all 0.3s ease;
+        }
+        
+        .module-card:hover {
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .module-status {
+            font-size: 0.875rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-weight: 500;
+        }
+        
+        .status-active {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status-trial {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .status-inactive {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .status-expired {
+            background: #f5c6cb;
+            color: #721c24;
+        }
+        
+        .user-badge {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 0.75rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .breadcrumb-item a {
+            color: #8E2DE2;
+            text-decoration: none;
+        }
+        
+        .config-item {
+            border-bottom: 1px solid #f1f3f4;
+            padding: 0.75rem 0;
+        }
+        
+        .config-item:last-child {
+            border-bottom: none;
+        }
+        
+        .refresh-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            color: white;
+            border-radius: 8px;
+            padding: 0.5rem 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .refresh-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+            color: white;
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <div class="container-fluid py-4">
+        <!-- Breadcrumb -->
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a href="{{ url_for('superadmin.dashboard') }}">
+                        <i class="fas fa-home"></i> Dashboard
+                    </a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a href="{{ url_for('superadmin.institutions') }}">Instituciones</a>
+                </li>
+                <li class="breadcrumb-item active">{{ institution.name }}</li>
+            </ol>
+        </nav>
+
+        <!-- Header -->
+        <div class="row mb-4">
+            <div class="col">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h1 class="h3 mb-1">
+                            <i class="fas fa-building text-primary me-2"></i>
+                            {{ institution.name }}
+                        </h1>
+                        <p class="text-muted mb-0">
+                            Código: <strong>{{ institution.code }}</strong> | 
+                            {{ institution.city }}
+                            {% if institution.is_active %}
+                                <span class="badge bg-success ms-2">Activa</span>
+                            {% else %}
+                                <span class="badge bg-warning ms-2">Inactiva</span>
+                            {% endif %}
+                        </p>
+                    </div>
+                    <div>
+                        <button class="btn refresh-btn" onclick="refreshModulesStatus()">
+                            <i class="fas fa-sync-alt me-2"></i>Actualizar Estado
+                        </button>
+                        <a href="{{ url_for('superadmin.institutions') }}" class="btn btn-outline-secondary ms-2">
+                            <i class="fas fa-arrow-left me-2"></i>Volver
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Estadísticas rápidas -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <span class="stat-number">{{ stats.total_modules }}</span>
+                    <small>Módulos Totales</small>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <span class="stat-number">{{ stats.active_modules }}</span>
+                    <small>Módulos Activos</small>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <span class="stat-number">{{ stats.trial_modules }}</span>
+                    <small>En Período de Prueba</small>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <span class="stat-number">{{ stats.total_users }}</span>
+                    <small>Usuarios Totales</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Información básica -->
+            <div class="col-lg-6">
+                <div class="info-card card">
+                    <div class="card-header">
+                        <i class="fas fa-info-circle me-2"></i>Información Básica
+                    </div>
+                    <div class="card-body">
+                        <div class="config-item">
+                            <strong>Nombre:</strong> {{ institution.name }}
+                        </div>
+                        <div class="config-item">
+                            <strong>Código:</strong> {{ institution.code }}
+                        </div>
+                        <div class="config-item">
+                            <strong>Ciudad:</strong> {{ institution.city }}
+                        </div>
+                        {% if institution.email %}
+                        <div class="config-item">
+                            <strong>Email:</strong> {{ institution.email }}
+                        </div>
+                        {% endif %}
+                        {% if institution.phone %}
+                        <div class="config-item">
+                            <strong>Teléfono:</strong> {{ institution.phone }}
+                        </div>
+                        {% endif %}
+                        {% if institution.address %}
+                        <div class="config-item">
+                            <strong>Dirección:</strong> {{ institution.address }}
+                        </div>
+                        {% endif %}
+                        <div class="config-item">
+                            <strong>Año Académico:</strong> {{ institution.academic_year or 'No especificado' }}
+                        </div>
+                        <div class="config-item">
+                            <strong>Estado:</strong> 
+                            {% if institution.is_active %}
+                                <span class="badge bg-success">Activa</span>
+                            {% else %}
+                                <span class="badge bg-warning">Inactiva</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Configuración adicional -->
+                {% if additional_settings %}
+                <div class="info-card card">
+                    <div class="card-header">
+                        <i class="fas fa-cogs me-2"></i>Configuración Adicional
+                    </div>
+                    <div class="card-body">
+                        {% if additional_settings.rector %}
+                        <div class="config-item">
+                            <strong>Rector:</strong> {{ additional_settings.rector.name }}
+                            {% if additional_settings.rector.email %}
+                                <br><small class="text-muted">{{ additional_settings.rector.email }}</small>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                        
+                        {% if additional_settings.niveles_educativos %}
+                        <div class="config-item">
+                            <strong>Niveles Educativos:</strong>
+                            {% for nivel in additional_settings.niveles_educativos %}
+                                <span class="badge bg-secondary me-1">{{ nivel|title }}</span>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                        
+                        {% if additional_settings.jornada %}
+                        <div class="config-item">
+                            <strong>Jornada:</strong> {{ additional_settings.jornada|title }}
+                        </div>
+                        {% endif %}
+                        
+                        {% if additional_settings.num_sedes %}
+                        <div class="config-item">
+                            <strong>Número de Sedes:</strong> {{ additional_settings.num_sedes }}
+                        </div>
+                        {% endif %}
+                        
+                        {% if additional_settings.estimated_students %}
+                        <div class="config-item">
+                            <strong>Estudiantes Estimados:</strong> {{ additional_settings.estimated_students }}
+                        </div>
+                        {% endif %}
+                        
+                        {% if additional_settings.system_config %}
+                        <div class="config-item">
+                            <strong>Zona Horaria:</strong> {{ additional_settings.system_config.timezone or 'America/Bogota' }}
+                        </div>
+                        <div class="config-item">
+                            <strong>Idioma:</strong> {{ additional_settings.system_config.language or 'es' }}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Estado de módulos -->
+            <div class="col-lg-6">
+                <div class="info-card card">
+                    <div class="card-header">
+                        <i class="fas fa-puzzle-piece me-2"></i>Estado de Módulos
+                        <span class="badge bg-light text-dark ms-2" id="modules-count">
+                            {{ stats.active_modules }}/{{ stats.total_modules }}
+                        </span>
+                    </div>
+                    <div class="card-body" id="modules-container">
+                        {% if modules_status.success %}
+                            {% for module_info in modules_status.modules %}
+                                {% set module = module_info.module %}
+                                {% if module_info.is_active %}
+                                <div class="module-card">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div class="flex-grow-1">
+                                            <div class="d-flex align-items-center mb-2">
+                                                <i class="{{ module.icon }} text-primary me-2"></i>
+                                                <strong>{{ module.name }}</strong>
+                                                {% if module.is_core %}
+                                                    <span class="badge bg-primary ms-2">Core</span>
+                                                {% endif %}
+                                            </div>
+                                            <small class="text-muted d-block">
+                                                {{ module.description[:100] }}...
+                                            </small>
+                                            {% if module_info.trial_ends_at %}
+                                            <small class="text-warning d-block mt-1">
+                                                <i class="fas fa-clock me-1"></i>
+                                                Prueba hasta: {{ module_info.trial_ends_at[:10] }}
+                                            </small>
+                                            {% endif %}
+                                        </div>
+                                        <div class="text-end">
+                                            {% if module_info.trial_ends_at %}
+                                                <span class="module-status status-trial">Prueba</span>
+                                            {% else %}
+                                                <span class="module-status status-active">Activo</span>
+                                            {% endif %}
+                                            {% if module.monthly_price > 0 %}
+                                            <small class="d-block text-muted mt-1">
+                                                ${{ module.monthly_price }}/mes
+                                            </small>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endif %}
+                            {% endfor %}
+                            
+                            <!-- Módulos inactivos -->
+                            {% set inactive_modules = modules_status.modules | selectattr('is_active', 'equalto', false) | list %}
+                            {% if inactive_modules %}
+                            <div class="mt-3">
+                                <h6 class="text-muted">Módulos Disponibles</h6>
+                                {% for module_info in inactive_modules %}
+                                    {% set module = module_info.module %}
+                                    <div class="module-card" style="opacity: 0.6;">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <i class="{{ module.icon }} text-muted me-2"></i>
+                                                <span class="text-muted">{{ module.name }}</span>
+                                            </div>
+                                            <span class="module-status status-inactive">Inactivo</span>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        {% else %}
+                            <div class="alert alert-warning">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                Error al obtener estado de módulos: {{ modules_status.error }}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Usuarios de la institución -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="info-card card">
+                    <div class="card-header">
+                        <i class="fas fa-users me-2"></i>Usuarios de la Institución
+                    </div>
+                    <div class="card-body">
+                        {% if users_by_role %}
+                            {% for role, users in users_by_role.items() %}
+                            <div class="mb-3">
+                                <h6 class="text-primary mb-2">
+                                    {{ role|title }} ({{ users|length }})
+                                </h6>
+                                {% for user in users %}
+                                <div class="user-badge">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <strong>{{ user.full_name or 'Sin nombre' }}</strong>
+                                            <br>
+                                            <small class="text-muted">
+                                                {{ user.email }} | {{ user.username }}
+                                            </small>
+                                        </div>
+                                        <div class="text-end">
+                                            {% if user.is_active %}
+                                                <span class="badge bg-success">Activo</span>
+                                            {% else %}
+                                                <span class="badge bg-danger">Inactivo</span>
+                                            {% endif %}
+                                            <br>
+                                            <small class="text-muted">{{ user.created_at }}</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle me-2"></i>
+                                No hay usuarios registrados para esta institución.
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+        async function refreshModulesStatus() {
+            const refreshBtn = document.querySelector('.refresh-btn');
+            const originalContent = refreshBtn.innerHTML;
+            
+            try {
+                // Mostrar loading
+                refreshBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Actualizando...';
+                refreshBtn.disabled = true;
+                
+                // Llamar al API
+                const response = await fetch(`/superadmin/institutions/{{ institution.id }}/modules/status`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Actualizar contador
+                    const activeCount = data.status_counts.active + data.status_counts.trial;
+                    document.getElementById('modules-count').textContent = `${activeCount}/${data.total_modules}`;
+                    
+                    // Mostrar mensaje de éxito
+                    showNotification('Estado de módulos actualizado correctamente', 'success');
+                    
+                    // Recargar página después de un momento
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1500);
+                } else {
+                    showNotification('Error al actualizar estado: ' + data.error, 'error');
+                }
+                
+            } catch (error) {
+                console.error('Error:', error);
+                showNotification('Error de conexión al actualizar estado', 'error');
+            } finally {
+                // Restaurar botón
+                refreshBtn.innerHTML = originalContent;
+                refreshBtn.disabled = false;
+            }
+        }
+        
+        function showNotification(message, type) {
+            const notification = document.createElement('div');
+            notification.className = `alert alert-${type === 'success' ? 'success' : 'danger'} alert-dismissible fade show`;
+            notification.style.cssText = 'position: fixed; top: 20px; right: 20px; z-index: 9999; max-width: 350px;';
+            notification.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check' : 'exclamation-triangle'} me-2"></i>
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.remove();
+                }
+            }, 5000);
+        }
+    </script>
+</body>
+</html>

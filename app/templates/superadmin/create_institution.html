@@ -1,789 +1,2266 @@
-{% extends "base.html" %}
-
-{% block title %}Nueva Institución - {{ super() }}{% endblock %}
-{% block page_title %}Nueva Institución{% endblock %}
-
-{% block extra_css %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nueva Institución - Dashboard</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 <style>
-    .form-container {
-        background: white;
-        border-radius: 16px;
-        padding: 2.5rem;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-        margin-bottom: 2rem;
-    }
+.form-container {
+background: white;
+border-radius: 16px;
+padding: 2.5rem;
+box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+margin-bottom: 2rem;
+}
 
-    .form-header {
-        text-align: center;
-        margin-bottom: 2rem;
-        padding-bottom: 1.5rem;
-        border-bottom: 2px solid #f1f3f4;
-    }
+.form-header {
+text-align: center;
+margin-bottom: 2rem;
+padding-bottom: 1.5rem;
+border-bottom: 2px solid #f1f3f4;
+}
 
-    .form-header h1 {
-        color: #1f2937;
-        font-weight: 700;
-        margin-bottom: 0.5rem;
-    }
+.form-header h1 {
+color: #1f2937;
+font-weight: 700;
+margin-bottom: 0.5rem;
+}
 
-    .form-header p {
-        color: #6b7280;
-        font-size: 1.1rem;
-    }
+.form-header p {
+color: #6b7280;
+font-size: 1.1rem;
+}
 
-    .form-section {
-        margin-bottom: 2rem;
-    }
+.form-section {
+margin-bottom: 2rem;
+}
 
-    .section-title {
-        font-size: 1.3rem;
-        font-weight: 600;
-        color: #374151;
-        margin-bottom: 1rem;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
+.section-title {
+font-size: 1.3rem;
+font-weight: 600;
+color: #374151;
+margin-bottom: 1rem;
+display: flex;
+align-items: center;
+gap: 0.5rem;
+}
 
-    .form-group {
-        margin-bottom: 1.5rem;
-    }
+.form-group {
+margin-bottom: 1.5rem;
+}
 
-    .form-label {
-        font-weight: 600;
-        color: #374151;
-        margin-bottom: 0.5rem;
-        display: block;
-    }
+.form-label {
+font-weight: 600;
+color: #374151;
+margin-bottom: 0.5rem;
+display: block;
+}
 
-    .form-control {
-        border: 2px solid #e5e7eb;
-        border-radius: 8px;
-        padding: 0.75rem 1rem;
-        font-size: 1rem;
-        transition: all 0.3s ease;
-        background-color: #ffffff;
-    }
+.form-control {
+border: 2px solid #e5e7eb;
+border-radius: 8px;
+padding: 0.75rem 1rem;
+font-size: 1rem;
+transition: all 0.3s ease;
+background-color: #ffffff;
+}
 
-    .form-control:focus {
-        border-color: #8E2DE2;
-        box-shadow: 0 0 0 3px rgba(142, 45, 226, 0.1);
-        outline: none;
-    }
+.form-control:focus {
+border-color: #8E2DE2;
+box-shadow: 0 0 0 3px rgba(142, 45, 226, 0.1);
+outline: none;
+}
 
-    .form-control:invalid {
-        border-color: #ef4444;
-    }
+.form-control:invalid {
+border-color: #ef4444;
+}
 
-    .form-text {
-        color: #6b7280;
-        font-size: 0.875rem;
-        margin-top: 0.25rem;
-    }
+.form-text {
+color: #6b7280;
+font-size: 0.875rem;
+margin-top: 0.25rem;
+}
 
-    .btn-primary {
-        background: linear-gradient(135deg, #8E2DE2 0%, #4A00E0 100%);
-        border: none;
-        border-radius: 10px;
-        padding: 0.75rem 2rem;
-        font-size: 1.1rem;
-        font-weight: 600;
-        transition: all 0.3s ease;
-        box-shadow: 0 4px 15px rgba(142, 45, 226, 0.4);
-    }
+.btn-primary {
+background: linear-gradient(135deg, #8E2DE2 0%, #4A00E0 100%);
+border: none;
+border-radius: 10px;
+padding: 0.75rem 2rem;
+font-size: 1.1rem;
+font-weight: 600;
+transition: all 0.3s ease;
+box-shadow: 0 4px 15px rgba(142, 45, 226, 0.4);
+}
 
-    .btn-primary:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 25px rgba(142, 45, 226, 0.6);
-    }
+.btn-primary:hover {
+transform: translateY(-2px);
+box-shadow: 0 8px 25px rgba(142, 45, 226, 0.6);
+}
 
-    .btn-secondary {
-        background: #6b7280;
-        border: none;
-        border-radius: 10px;
-        padding: 0.75rem 1.5rem;
-        font-weight: 600;
-        transition: all 0.3s ease;
-    }
+.btn-secondary {
+background: #6b7280;
+border: none;
+border-radius: 10px;
+padding: 0.75rem 1.5rem;
+font-weight: 600;
+transition: all 0.3s ease;
+}
 
-    .btn-secondary:hover {
-        background: #4b5563;
-        transform: translateY(-1px);
-    }
+.btn-secondary:hover {
+background: #4b5563;
+transform: translateY(-1px);
+}
 
-    .input-group-text {
-        background: #f9fafb;
-        border: 2px solid #e5e7eb;
-        border-right: none;
-        color: #6b7280;
-    }
+.input-group-text {
+background: #f9fafb;
+border: 2px solid #e5e7eb;
+border-right: none;
+color: #6b7280;
+}
 
-    .input-group .form-control {
-        border-left: none;
-    }
+.input-group .form-control {
+border-left: none;
+}
 
-    .input-group:focus-within .input-group-text {
-        border-color: #8E2DE2;
-        background: rgba(142, 45, 226, 0.05);
-    }
+.input-group:focus-within .input-group-text {
+border-color: #8E2DE2;
+background: rgba(142, 45, 226, 0.05);
+}
 
-    .required {
-        color: #ef4444;
-    }
+.required {
+color: #ef4444;
+}
 
-    .form-actions {
-        margin-top: 3rem;
-        padding-top: 2rem;
-        border-top: 2px solid #f1f3f4;
-        display: flex;
-        gap: 1rem;
-        justify-content: center;
-    }
+.form-actions {
+margin-top: 3rem;
+padding-top: 2rem;
+border-top: 2px solid #f1f3f4;
+display: flex;
+gap: 1rem;
+justify-content: center;
+}
 
-    .color-picker-group {
-        display: flex;
-        gap: 1rem;
-        align-items: center;
-    }
+.admin-info-box {
+background: rgba(142, 45, 226, 0.05);
+border: 1px solid rgba(142, 45, 226, 0.2);
+border-radius: 12px;
+padding: 1.5rem;
+margin-top: 1rem;
+}
 
-    .color-input {
-        width: 60px;
-        height: 40px;
-        border: 2px solid #e5e7eb;
-        border-radius: 8px;
-        cursor: pointer;
-        transition: all 0.3s ease;
-    }
+.admin-info-box h6 {
+color: #8E2DE2;
+font-weight: 700;
+margin-bottom: 1rem;
+}
 
-    .color-input:hover {
-        transform: scale(1.1);
-    }
+.field-indicator {
+font-size: 0.875rem;
+margin-top: 0.25rem;
+transition: all 0.3s ease;
+}
 
-    .logo-upload {
-        border: 2px dashed #e5e7eb;
-        border-radius: 12px;
-        padding: 2rem;
-        text-align: center;
-        transition: all 0.3s ease;
-        cursor: pointer;
-    }
+.field-indicator.loading {
+color: #8E2DE2;
+}
 
-    .logo-upload:hover {
-        border-color: #8E2DE2;
-        background: rgba(142, 45, 226, 0.05);
-    }
+.field-indicator.success {
+color: #059669;
+}
 
-    .logo-upload.dragover {
-        border-color: #8E2DE2;
-        background: rgba(142, 45, 226, 0.1);
-    }
+.field-indicator.error {
+color: #dc2626;
+}
 
-    .logo-preview {
-        max-width: 150px;
-        max-height: 150px;
-        margin: 1rem auto;
-        border-radius: 8px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    }
+.field-indicator.warning {
+color: #d97706;
+}
 
-    .admin-info-box {
-        background: rgba(142, 45, 226, 0.05);
-        border: 1px solid rgba(142, 45, 226, 0.2);
-        border-radius: 12px;
-        padding: 1.5rem;
-        margin-top: 1rem;
-    }
+.form-control.is-valid {
+border-color: #059669;
+box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.1);
+}
 
-    .admin-info-box h6 {
-        color: #8E2DE2;
-        font-weight: 700;
-        margin-bottom: 1rem;
-    }
+.form-control.is-invalid {
+border-color: #dc2626;
+box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+}
 
-    @media (max-width: 768px) {
-        .form-container {
-            padding: 1.5rem;
-        }
-        
-        .form-actions {
-            flex-direction: column;
-        }
-        
-        .btn {
-            width: 100%;
-        }
+/* 🆕 ESTILOS PARA MÓDULOS DINÁMICOS */
+.module-card {
+border: 2px solid #e5e7eb;
+border-radius: 12px;
+transition: all 0.3s ease;
+margin-bottom: 1rem;
+}
 
-        .color-picker-group {
-            flex-direction: column;
-            align-items: stretch;
-        }
-    }
+.module-card:hover {
+border-color: #8E2DE2;
+box-shadow: 0 4px 12px rgba(142, 45, 226, 0.1);
+}
+
+.module-card.selected {
+border-color: #8E2DE2;
+background: rgba(142, 45, 226, 0.02);
+}
+
+.module-card.disabled {
+opacity: 0.6;
+background: #f9fafb;
+}
+
+.module-header {
+display: flex;
+align-items: center;
+padding: 1rem;
+cursor: pointer;
+}
+
+.module-icon {
+width: 40px;
+height: 40px;
+border-radius: 10px;
+display: flex;
+align-items: center;
+justify-content: center;
+margin-right: 1rem;
+font-size: 1.2rem;
+}
+
+.module-info {
+flex: 1;
+}
+
+.module-name {
+font-weight: 600;
+color: #374151;
+margin-bottom: 0.25rem;
+}
+
+.module-description {
+font-size: 0.875rem;
+color: #6b7280;
+line-height: 1.4;
+margin-bottom: 0.5rem;
+}
+
+.module-meta {
+display: flex;
+gap: 1rem;
+font-size: 0.75rem;
+}
+
+.module-price {
+background: #f3f4f6;
+padding: 0.25rem 0.5rem;
+border-radius: 6px;
+font-weight: 600;
+}
+
+.module-trial {
+background: #fef3c7;
+color: #92400e;
+padding: 0.25rem 0.5rem;
+border-radius: 6px;
+}
+
+.module-dependencies {
+background: #dbeafe;
+color: #1e40af;
+padding: 0.25rem 0.5rem;
+border-radius: 6px;
+}
+
+.modules-loading {
+text-align: center;
+padding: 2rem;
+color: #6b7280;
+}
+
+.modules-error {
+background: #fee2e2;
+border: 1px solid #fecaca;
+border-radius: 8px;
+padding: 1rem;
+color: #dc2626;
+margin: 1rem 0;
+}
+
+@keyframes fadeIn {
+from { opacity: 0; transform: translateY(-10px); }
+to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 768px) {
+.form-container {
+    padding: 1.5rem;
+}
+
+.form-actions {
+    flex-direction: column;
+}
+
+.btn {
+    width: 100%;
+}
+
+.module-header {
+    padding: 0.75rem;
+}
+
+.module-meta {
+    flex-direction: column;
+    gap: 0.5rem;
+}
+}
 </style>
-{% endblock %}
-
-{% block content %}
+</head>
+<body>
 <div class="container-fluid">
-    <div class="row justify-content-center">
-        <div class="col-lg-10 col-xl-8">
-            <div class="form-container">
-                <div class="form-header">
-                    <h1>
-                        <i class="fas fa-building text-primary"></i>
-                        Crear Nueva Institución
-                    </h1>
-                    <p>Complete la información para registrar una nueva institución educativa en el sistema</p>
-                </div>
+<div class="row justify-content-center">
+<div class="col-lg-10 col-xl-8">
+    <div class="form-container">
+        <div class="form-header">
+            <h1>
+                <i class="fas fa-building text-primary"></i>
+                Crear Nueva Institución
+            </h1>
+            <p>Complete la información para registrar una nueva institución educativa en el sistema</p>
+        </div>
 
-                <form method="POST" enctype="multipart/form-data" novalidate>
-                    <!-- Información Básica -->
-                    <div class="form-section">
-                        <h3 class="section-title">
-                            <i class="fas fa-info-circle text-primary"></i>
-                            Información Básica
-                        </h3>
+        <form method="POST" enctype="multipart/form-data" novalidate>
+            <!-- Información Básica -->
+            <div class="form-section">
+                <h3 class="section-title">
+                    <i class="fas fa-info-circle text-primary"></i>
+                    Información Básica
+                </h3>
 
-                        <div class="row">
-                            <div class="col-md-8">
-                                <div class="form-group">
-                                    <label for="name" class="form-label">
-                                        Nombre de la Institución <span class="required">*</span>
-                                    </label>
-                                    <input type="text" 
-                                           class="form-control" 
-                                           id="name" 
-                                           name="name" 
-                                           placeholder="Ej: Colegio San José"
-                                           required>
-                                    <div class="form-text">Nombre completo y oficial de la institución</div>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label for="code" class="form-label">
-                                        Código <span class="required">*</span>
-                                    </label>
-                                    <input type="text" 
-                                           class="form-control" 
-                                           id="code" 
-                                           name="code" 
-                                           placeholder="CSJ001"
-                                           pattern="[A-Z0-9]{3,10}"
-                                           required>
-                                    <div class="form-text">Código único (3-10 caracteres)</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="academic_year" class="form-label">
-                                        Año Académico <span class="required">*</span>
-                                    </label>
-                                    <input type="number" 
-                                           class="form-control" 
-                                           id="academic_year" 
-                                           name="academic_year" 
-                                           value="{{ current_year }}"
-                                           min="2020" 
-                                           max="2030"
-                                           required>
-                                    <div class="form-text">Año académico actual de la institución</div>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="type" class="form-label">Tipo de Institución</label>
-                                    <select class="form-control" id="type" name="type">
-                                        <option value="">Seleccionar...</option>
-                                        <option value="colegio">Colegio</option>
-                                        <option value="universidad">Universidad</option>
-                                        <option value="instituto">Instituto Técnico</option>
-                                        <option value="academia">Academia</option>
-                                        <option value="otro">Otro</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-
+                <div class="row">
+                    <div class="col-md-8">
                         <div class="form-group">
-                            <label for="description" class="form-label">Descripción</label>
-                            <textarea class="form-control" 
-                                      id="description" 
-                                      name="description" 
-                                      rows="3"
-                                      placeholder="Breve descripción de la institución educativa..."></textarea>
-                        </div>
-                    </div>
-
-                    <!-- Ubicación -->
-                    <div class="form-section">
-                        <h3 class="section-title">
-                            <i class="fas fa-map-marker-alt text-primary"></i>
-                            Ubicación
-                        </h3>
-
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="city" class="form-label">
-                                        Ciudad <span class="required">*</span>
-                                    </label>
-                                    <input type="text" 
-                                           class="form-control" 
-                                           id="city" 
-                                           name="city" 
-                                           placeholder="Barranquilla"
-                                           required>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="state" class="form-label">Departamento</label>
-                                    <input type="text" 
-                                           class="form-control" 
-                                           id="state" 
-                                           name="state" 
-                                           placeholder="Atlántico">
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="address" class="form-label">Dirección</label>
+                            <label for="name" class="form-label">
+                                Nombre de la Institución <span class="required">*</span>
+                            </label>
                             <input type="text" 
                                    class="form-control" 
-                                   id="address" 
-                                   name="address" 
-                                   placeholder="Calle 45 #23-67, Barrio Norte">
+                                   id="name" 
+                                   name="name" 
+                                   placeholder="Ej: Colegio San José"
+                                   required>
+                            <div class="form-text">Nombre completo y oficial de la institución</div>
                         </div>
                     </div>
-
-                    <!-- Información de Contacto -->
-                    <div class="form-section">
-                        <h3 class="section-title">
-                            <i class="fas fa-phone text-primary"></i>
-                            Información de Contacto
-                        </h3>
-
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="phone" class="form-label">Teléfono Principal</label>
-                                    <div class="input-group">
-                                        <span class="input-group-text">
-                                            <i class="fas fa-phone"></i>
-                                        </span>
-                                        <input type="tel" 
-                                               class="form-control" 
-                                               id="phone" 
-                                               name="phone" 
-                                               placeholder="+57 5 3601234">
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="email" class="form-label">Email Institucional</label>
-                                    <div class="input-group">
-                                        <span class="input-group-text">
-                                            <i class="fas fa-envelope"></i>
-                                        </span>
-                                        <input type="email" 
-                                               class="form-control" 
-                                               id="email" 
-                                               name="email" 
-                                               placeholder="info@colegio.edu.co">
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
+                    <div class="col-md-4">
                         <div class="form-group">
-                            <label for="website" class="form-label">Sitio Web</label>
+                            <label for="code" class="form-label">
+                                Código <span class="required">*</span>
+                            </label>
+                            <input type="text" 
+                                   class="form-control" 
+                                   id="code" 
+                                   name="code" 
+                                   placeholder="CSJ001"
+                                   pattern="[A-Z0-9]{3,10}"
+                                   required>
+                            <div class="form-text">Código único (3-10 caracteres)</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label for="codigo_dane" class="form-label">
+                                Código DANE
+                            </label>
+                            <input type="text" 
+                                   class="form-control" 
+                                   id="codigo_dane" 
+                                   name="codigo_dane" 
+                                   placeholder="111001000001"
+                                   pattern="[0-9]{12}">
+                            <div class="form-text">Código oficial del Ministerio de Educación</div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label for="nit" class="form-label">
+                                NIT <span class="required">*</span>
+                            </label>
+                            <input type="text" 
+                                   class="form-control" 
+                                   id="nit" 
+                                   name="nit" 
+                                   placeholder="800.123.456-7"
+                                   required>
+                            <div class="form-text">Número de identificación tributaria</div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label for="academic_year" class="form-label">
+                                Año Académico <span class="required">*</span>
+                            </label>
+                            <input type="number" 
+                                   class="form-control" 
+                                   id="academic_year" 
+                                   name="academic_year" 
+                                   value="2025"
+                                   min="2020" 
+                                   max="2030"
+                                   required>
+                            <div class="form-text">Año académico actual</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="type" class="form-label">Tipo de Institución <span class="required">*</span></label>
+                            <select class="form-control" id="type" name="type" required>
+                                <option value="">Seleccionar...</option>
+                                <option value="colegio">Colegio</option>
+                                <option value="universidad">Universidad</option>
+                                <option value="instituto">Instituto Técnico</option>
+                                <option value="academia">Academia</option>
+                                <option value="otro">Otro</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="estimated_students" class="form-label">
+                                Número de Estudiantes Estimado
+                            </label>
+                            <input type="number" 
+                                   class="form-control" 
+                                   id="estimated_students" 
+                                   name="estimated_students" 
+                                   placeholder="500"
+                                   min="1"
+                                   max="10000">
+                            <div class="form-text">Para establecer el volumen aproximado</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="description" class="form-label">Descripción</label>
+                    <textarea class="form-control" 
+                              id="description" 
+                              name="description" 
+                              rows="3"
+                              placeholder="Breve descripción de la institución educativa..."></textarea>
+                </div>
+            </div>
+
+            <!-- Ubicación -->
+            <div class="form-section">
+                <h3 class="section-title">
+                    <i class="fas fa-map-marker-alt text-primary"></i>
+                    Ubicación y Contacto
+                </h3>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="department" class="form-label">
+                                Departamento <span class="required">*</span>
+                            </label>
+                            <select class="form-control" id="department" name="department" required>
+                                <option value="">Seleccionar departamento...</option>
+                                <option value="Amazonas">Amazonas</option>
+                                <option value="Antioquia">Antioquia</option>
+                                <option value="Arauca">Arauca</option>
+                                <option value="Atlántico" selected>Atlántico</option>
+                                <option value="Bolívar">Bolívar</option>
+                                <option value="Boyacá">Boyacá</option>
+                                <option value="Caldas">Caldas</option>
+                                <option value="Caquetá">Caquetá</option>
+                                <option value="Casanare">Casanare</option>
+                                <option value="Cauca">Cauca</option>
+                                <option value="Cesar">Cesar</option>
+                                <option value="Chocó">Chocó</option>
+                                <option value="Córdoba">Córdoba</option>
+                                <option value="Cundinamarca">Cundinamarca</option>
+                                <option value="Guainía">Guainía</option>
+                                <option value="Guaviare">Guaviare</option>
+                                <option value="Huila">Huila</option>
+                                <option value="La Guajira">La Guajira</option>
+                                <option value="Magdalena">Magdalena</option>
+                                <option value="Meta">Meta</option>
+                                <option value="Nariño">Nariño</option>
+                                <option value="Norte de Santander">Norte de Santander</option>
+                                <option value="Putumayo">Putumayo</option>
+                                <option value="Quindío">Quindío</option>
+                                <option value="Risaralda">Risaralda</option>
+                                <option value="San Andrés y Providencia">San Andrés y Providencia</option>
+                                <option value="Santander">Santander</option>
+                                <option value="Sucre">Sucre</option>
+                                <option value="Tolima">Tolima</option>
+                                <option value="Valle del Cauca">Valle del Cauca</option>
+                                <option value="Vaupés">Vaupés</option>
+                                <option value="Vichada">Vichada</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="city" class="form-label">
+                                Ciudad <span class="required">*</span>
+                            </label>
+                            <select class="form-control" id="city" name="city" required>
+                                <option value="">Seleccionar ciudad...</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="address" class="form-label">Dirección <span class="required">*</span></label>
+                    <input type="text" 
+                           class="form-control" 
+                           id="address" 
+                           name="address" 
+                           placeholder="Calle 45 #23-67, Barrio Norte"
+                           required>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="phone" class="form-label">Teléfono Principal <span class="required">*</span></label>
                             <div class="input-group">
                                 <span class="input-group-text">
-                                    <i class="fas fa-globe"></i>
+                                    <i class="fas fa-phone"></i>
                                 </span>
-                                <input type="url" 
+                                <input type="tel" 
                                        class="form-control" 
-                                       id="website" 
-                                       name="website" 
-                                       placeholder="https://www.colegio.edu.co">
+                                       id="phone" 
+                                       name="phone" 
+                                       placeholder="+57 5 3601234"
+                                       required>
                             </div>
                         </div>
                     </div>
-
-                    <!-- Personalización Visual -->
-                    <div class="form-section">
-                        <h3 class="section-title">
-                            <i class="fas fa-palette text-primary"></i>
-                            Personalización Visual
-                        </h3>
-
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="logo" class="form-label">Logo de la Institución</label>
-                                    <div class="logo-upload" onclick="document.getElementById('logo').click()">
-                                        <i class="fas fa-cloud-upload-alt fa-2x text-muted mb-2"></i>
-                                        <p class="mb-0">Haga clic o arrastre el logo aquí</p>
-                                        <small class="text-muted">PNG, JPG hasta 2MB</small>
-                                        <input type="file" 
-                                               id="logo" 
-                                               name="logo" 
-                                               accept="image/*" 
-                                               style="display: none;"
-                                               onchange="previewLogo(this)">
-                                    </div>
-                                    <img id="logo-preview" class="logo-preview" style="display: none;">
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label class="form-label">Colores Institucionales</label>
-                                    <div class="color-picker-group">
-                                        <div>
-                                            <label for="color_primary" class="form-label">Color Primario</label>
-                                            <input type="color" 
-                                                   class="color-input" 
-                                                   id="color_primary" 
-                                                   name="color_primary" 
-                                                   value="#8E2DE2">
-                                        </div>
-                                        <div>
-                                            <label for="color_secondary" class="form-label">Color Secundario</label>
-                                            <input type="color" 
-                                                   class="color-input" 
-                                                   id="color_secondary" 
-                                                   name="color_secondary" 
-                                                   value="#6c757d">
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Configuración Inicial -->
-                    <div class="form-section">
-                        <h3 class="section-title">
-                            <i class="fas fa-cogs text-primary"></i>
-                            Configuración Inicial
-                        </h3>
-
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="status" class="form-label">Estado Inicial</label>
-                                    <select class="form-control" id="status" name="status">
-                                        <option value="active" selected>Activa</option>
-                                        <option value="trial">Período de Prueba</option>
-                                        <option value="inactive">Inactiva</option>
-                                        <option value="pending">Pendiente de Configuración</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="max_students" class="form-label">Límite de Estudiantes</label>
-                                    <input type="number" 
-                                           class="form-control" 
-                                           id="max_students" 
-                                           name="max_students" 
-                                           placeholder="500"
-                                           min="1"
-                                           max="10000">
-                                    <div class="form-text">Máximo número de estudiantes permitidos</div>
-                                </div>
-                            </div>
-                        </div>
-
+                    <div class="col-md-6">
                         <div class="form-group">
-                            <div class="form-check">
-                                <input class="form-check-input" 
-                                       type="checkbox" 
-                                       id="create_admin" 
-                                       name="create_admin" 
-                                       checked>
-                                <label class="form-check-label" for="create_admin">
-                                    <strong>Crear automáticamente usuario administrador para esta institución</strong>
-                                </label>
-                            </div>
-                            <div class="form-text">
-                                Se generará un usuario administrador con credenciales temporales
-                            </div>
-                        </div>
-
-                        <div class="admin-info-box" id="admin-info" style="display: none;">
-                            <h6><i class="fas fa-user-shield me-2"></i>Información del Administrador</h6>
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label for="admin_name" class="form-label">Nombre Completo</label>
-                                        <input type="text" 
-                                               class="form-control" 
-                                               id="admin_name" 
-                                               name="admin_name" 
-                                               placeholder="Juan Pérez González">
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label for="admin_email" class="form-label">Email del Administrador</label>
-                                        <input type="email" 
-                                               class="form-control" 
-                                               id="admin_email" 
-                                               name="admin_email" 
-                                               placeholder="admin@colegio.edu.co">
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="alert alert-info">
-                                <i class="fas fa-key me-2"></i>
-                                <strong>Se generará automáticamente:</strong>
-                                <ul class="mb-0 mt-2">
-                                    <li>Username: admin_[código_institución]</li>
-                                    <li>Contraseña temporal segura</li>
-                                    <li>Envío de credenciales por email</li>
-                                </ul>
+                            <label for="email" class="form-label">Email Institucional <span class="required">*</span></label>
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="fas fa-envelope"></i>
+                                </span>
+                                <input type="email" 
+                                       class="form-control" 
+                                       id="email" 
+                                       name="email" 
+                                       placeholder="info@colegio.edu.co"
+                                       required>
                             </div>
                         </div>
                     </div>
+                </div>
 
-                    <!-- Botones de Acción -->
-                    <div class="form-actions">
-                        <a href="{{ url_for('superadmin.institutions') }}" class="btn btn-secondary">
-                            <i class="fas fa-times me-2"></i>
-                            Cancelar
-                        </a>
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-plus me-2"></i>
-                            Crear Institución
-                        </button>
+                <div class="form-group">
+                    <label for="website" class="form-label">Sitio Web</label>
+                    <div class="input-group">
+                        <span class="input-group-text">
+                            <i class="fas fa-globe"></i>
+                        </span>
+                        <input type="url" 
+                               class="form-control" 
+                               id="website" 
+                               name="website" 
+                               placeholder="https://www.colegio.edu.co">
                     </div>
-                </form>
+                </div>
             </div>
-        </div>
+
+            <!-- Configuración Académica -->
+            <div class="form-section">
+                <h3 class="section-title">
+                    <i class="fas fa-graduation-cap text-primary"></i>
+                    Configuración Académica
+                </h3>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="num_sedes" class="form-label">Cantidad de Sedes</label>
+                            <select class="form-control" id="num_sedes" name="num_sedes">
+                                <option value="1" selected>Una sede</option>
+                                <option value="2">Dos sedes</option>
+                                <option value="3">Tres sedes</option>
+                                <option value="multiple">Múltiples sedes</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="jornada" class="form-label">Tipo de Jornada</label>
+                            <select class="form-control" id="jornada" name="jornada">
+                                <option value="">Seleccionar...</option>
+                                <option value="unica">Jornada única</option>
+                                <option value="manana">Mañana</option>
+                                <option value="tarde">Tarde</option>
+                                <option value="nocturna">Nocturna</option>
+                                <option value="multiple">Múltiples jornadas</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Niveles Educativos Ofrecidos <span class="required">*</span></label>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="preescolar" name="niveles[]" value="preescolar">
+                                <label class="form-check-label" for="preescolar">Preescolar</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="primaria" name="niveles[]" value="primaria">
+                                <label class="form-check-label" for="primaria">Primaria</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="secundaria" name="niveles[]" value="secundaria">
+                                <label class="form-check-label" for="secundaria">Secundaria</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="media" name="niveles[]" value="media">
+                                <label class="form-check-label" for="media">Educación Media</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="tecnica" name="niveles[]" value="tecnica">
+                                <label class="form-check-label" for="tecnica">Técnica</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="superior" name="niveles[]" value="superior">
+                                <label class="form-check-label" for="superior">Educación Superior</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Datos del Rector -->
+            <div class="form-section">
+                <h3 class="section-title">
+                    <i class="fas fa-user-tie text-primary"></i>
+                    Datos del Rector o Representante
+                </h3>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="rector_name" class="form-label">
+                                Nombre Completo del Rector(a) <span class="required">*</span>
+                            </label>
+                            <input type="text" 
+                                   class="form-control" 
+                                   id="rector_name" 
+                                   name="rector_name" 
+                                   placeholder="Dr. María González Pérez"
+                                   required>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="rector_email" class="form-label">
+                                Email del Rector(a) <span class="required">*</span>
+                            </label>
+                            <input type="email" 
+                                   class="form-control" 
+                                   id="rector_email" 
+                                   name="rector_email" 
+                                   placeholder="rectoria@colegio.edu.co"
+                                   required>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="rector_phone" class="form-label">
+                                Teléfono del Rector(a) <span class="required">*</span>
+                            </label>
+                            <input type="tel" 
+                                   class="form-control" 
+                                   id="rector_phone" 
+                                   name="rector_phone" 
+                                   placeholder="+57 300 1234567"
+                                   required>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="rector_document" class="form-label">
+                                Documento de Identidad
+                            </label>
+                            <input type="text" 
+                                   class="form-control" 
+                                   id="rector_document" 
+                                   name="rector_document" 
+                                   placeholder="12345678">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Configuración de Subdominio -->
+            <div class="form-section">
+                <h3 class="section-title">
+                    <i class="fas fa-globe text-primary"></i>
+                    Configuración de Subdominio
+                </h3>
+
+                <div class="row">
+                    <div class="col-md-8">
+                        <div class="form-group">
+                            <label for="subdomain" class="form-label">
+                                Subdominio <span class="required">*</span>
+                            </label>
+                            <div class="input-group">
+                                <input type="text" 
+                                       class="form-control" 
+                                       id="subdomain" 
+                                       name="subdomain" 
+                                       placeholder="villasanpablo"
+                                       pattern="[a-z0-9\-]{3,30}"
+                                       required>
+                                <span class="input-group-text">.educontrol.co</span>
+                            </div>
+                            <div class="form-text">URL de acceso: <strong id="subdomain-preview">https://villasanpablo.educontrol.co</strong></div>
+                            <div id="subdomain-suggestions" class="mt-2" style="display: none;">
+                                <small class="text-muted">Sugerencias disponibles:</small>
+                                <div id="suggestions-list" class="d-flex flex-wrap gap-2 mt-1"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label class="form-label">Generación Automática</label>
+                            <div class="d-grid gap-2">
+                                <button type="button" 
+                                        class="btn btn-outline-primary btn-sm" 
+                                        onclick="generateSubdomainSuggestions()">
+                                    <i class="fas fa-magic me-1"></i>
+                                    Generar Sugerencias
+                                </button>
+                                <button type="button" 
+                                        class="btn btn-outline-secondary btn-sm" 
+                                        onclick="checkSubdomainAvailability()">
+                                    <i class="fas fa-search me-1"></i>
+                                    Verificar Disponibilidad
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    <strong>Reglas para el subdominio:</strong>
+                    <ul class="mb-0 mt-1">
+                        <li>Solo letras minúsculas, números y guiones</li>
+                        <li>Entre 3 y 30 caracteres</li>
+                        <li>No puede comenzar o terminar con guión</li>
+                        <li>Debe ser único en el sistema</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Configuración del Usuario Administrador -->
+            <div class="form-section">
+                <h3 class="section-title">
+                    <i class="fas fa-user-shield text-primary"></i>
+                    Configuración del Administrador Institucional
+                </h3>
+
+                <div class="form-group">
+                    <div class="form-check">
+                        <input class="form-check-input" 
+                               type="checkbox" 
+                               id="create_admin" 
+                               name="create_admin" 
+                               checked>
+                        <label class="form-check-label" for="create_admin">
+                            <strong>Crear automáticamente usuario administrador para esta institución</strong>
+                        </label>
+                    </div>
+                    <div class="form-text">
+                        Se generará un usuario administrador con credenciales temporales
+                    </div>
+                </div>
+
+                <div class="admin-info-box" id="admin-info">
+                    <h6><i class="fas fa-user-shield me-2"></i>Información del Administrador</h6>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="admin_name" class="form-label">Nombre Completo <span class="required">*</span></label>
+                                <input type="text" 
+                                       class="form-control" 
+                                       id="admin_name" 
+                                       name="admin_name" 
+                                       placeholder="Juan Pérez González">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="admin_email" class="form-label">Email del Administrador <span class="required">*</span></label>
+                                <input type="email" 
+                                       class="form-control" 
+                                       id="admin_email" 
+                                       name="admin_email" 
+                                       placeholder="admin@colegio.edu.co">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="admin_phone" class="form-label">Teléfono del Administrador</label>
+                                <input type="tel" 
+                                       class="form-control" 
+                                       id="admin_phone" 
+                                       name="admin_phone" 
+                                       placeholder="+57 300 1234567">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="admin_document" class="form-label">Documento de Identidad</label>
+                                <input type="text" 
+                                       class="form-control" 
+                                       id="admin_document" 
+                                       name="admin_document" 
+                                       placeholder="87654321">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="alert alert-info">
+                        <i class="fas fa-key me-2"></i>
+                        <strong>Se generará automáticamente:</strong>
+                        <ul class="mb-0 mt-2">
+                            <li>Username: admin_[código_institución]</li>
+                            <li>Contraseña temporal segura</li>
+                            <li>Envío de credenciales por email</li>
+                            <li>Forzar cambio de contraseña en primer ingreso</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 🆕 SECCIÓN DE MÓDULOS DINÁMICOS -->
+            <div class="form-section">
+                <h3 class="section-title">
+                    <i class="fas fa-puzzle-piece text-primary"></i>
+                    Módulos del Sistema
+                </h3>
+
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    <strong>Sobre los módulos:</strong>
+                    <ul class="mb-0 mt-1">
+                        <li>Los <strong>módulos core</strong> se activan automáticamente</li>
+                        <li>Los módulos seleccionados tendrán un <strong>período de prueba gratuito</strong></li>
+                        <li>Algunos módulos tienen <strong>dependencias</strong> que se activarán automáticamente</li>
+                        <li>Puedes modificar los módulos activos después de crear la institución</li>
+                    </ul>
+                </div>
+
+                <!-- Loading state -->
+                <div id="modules-loading" class="modules-loading">
+                    <i class="fas fa-spinner fa-spin text-primary fa-2x mb-2"></i>
+                    <p>Cargando módulos disponibles...</p>
+                </div>
+
+                <!-- Error state -->
+                <div id="modules-error" class="modules-error" style="display: none;">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <strong>Error al cargar módulos.</strong> Se usará la configuración por defecto.
+                </div>
+
+                <!-- Modules container -->
+                <div id="modules-container" class="row" style="display: none;">
+                    <!-- Los módulos se cargarán dinámicamente aquí -->
+                </div>
+
+                <!-- Resumen de módulos seleccionados -->
+                <div id="modules-summary" class="mt-3" style="display: none;">
+                    <div class="card bg-light">
+                        <div class="card-body">
+                            <h6 class="card-title">
+                                <i class="fas fa-list me-2"></i>
+                                Resumen de Módulos Seleccionados
+                            </h6>
+                            <div id="summary-content">
+                                <!-- Contenido del resumen se genera dinámicamente -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Configuración Inicial del Sistema -->
+            <div class="form-section">
+                <h3 class="section-title">
+                    <i class="fas fa-cogs text-primary"></i>
+                    Configuración Inicial del Sistema
+                </h3>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="status" class="form-label">Estado Inicial</label>
+                            <select class="form-control" id="status" name="status">
+                                <option value="trial" selected>Período de Prueba (30 días)</option>
+                                <option value="active">Activa</option>
+                                <option value="inactive">Inactiva</option>
+                                <option value="pending">Pendiente de Configuración</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="max_students" class="form-label">Límite de Estudiantes</label>
+                            <input type="number" 
+                                   class="form-control" 
+                                   id="max_students" 
+                                   name="max_students" 
+                                   placeholder="1000"
+                                   min="1"
+                                   max="10000">
+                            <div class="form-text">Máximo número de estudiantes permitidos (0 = ilimitado)</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="timezone" class="form-label">Zona Horaria</label>
+                            <select class="form-control" id="timezone" name="timezone">
+                                <option value="America/Bogota" selected>Colombia (UTC-5)</option>
+                                <option value="America/New_York">Nueva York (UTC-5/-4)</option>
+                                <option value="America/Mexico_City">México (UTC-6)</option>
+                                <option value="America/Lima">Lima (UTC-5)</option>
+                                <option value="America/Caracas">Caracas (UTC-4)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="language" class="form-label">Idioma del Sistema</label>
+                            <select class="form-control" id="language" name="language">
+                                <option value="es" selected>Español</option>
+                                <option value="en">English</option>
+                                <option value="pt">Português</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Botones de Acción -->
+            <div class="form-actions">
+                <button type="button" class="btn btn-secondary" onclick="history.back()">
+                    <i class="fas fa-times me-2"></i>
+                    Cancelar
+                </button>
+                <button type="button" class="btn btn-outline-primary" onclick="saveDraft()">
+                    <i class="fas fa-save me-2"></i>
+                    Guardar Borrador
+                </button>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-plus me-2"></i>
+                    Crear Institución
+                </button>
+            </div>
+        </form>
     </div>
 </div>
-{% endblock %}
+</div>
+</div>
 
-{% block extra_js %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Establecer año actual
-    const currentYear = new Date().getFullYear();
-    document.getElementById('academic_year').value = currentYear;
+// ===== VARIABLES GLOBALES =====
+const ciudadesPorDepartamento = {
+'Atlántico': ['Barranquilla', 'Soledad', 'Malambo', 'Sabanagrande', 'Puerto Colombia', 'Galapa', 'Baranoa'],
+'Antioquia': ['Medellín', 'Bello', 'Itagüí', 'Envigado', 'Rionegro', 'Sabaneta', 'La Estrella'],
+'Cundinamarca': ['Bogotá', 'Soacha', 'Chía', 'Zipaquirá', 'Facatativá', 'Madrid', 'Mosquera'],
+'Valle del Cauca': ['Cali', 'Palmira', 'Buenaventura', 'Tuluá', 'Cartago', 'Buga', 'Jamundí'],
+'Bolívar': ['Cartagena', 'Magangué', 'Turbaco', 'Arjona', 'El Carmen de Bolívar'],
+'Santander': ['Bucaramanga', 'Floridablanca', 'Girón', 'Piedecuesta', 'Barrancabermeja'],
+'Norte de Santander': ['Cúcuta', 'Los Patios', 'Villa del Rosario', 'Ocaña'],
+'Córdoba': ['Montería', 'Lorica', 'Cereté', 'Sahagún', 'Planeta Rica'],
+'Sucre': ['Sincelejo', 'Corozal', 'Sampués', 'San Marcos'],
+'Magdalena': ['Santa Marta', 'Ciénaga', 'Fundación', 'Plato'],
+'La Guajira': ['Riohacha', 'Maicao', 'San Juan del Cesar'],
+'Cesar': ['Valledupar', 'Aguachica', 'Codazzi'],
+'Risaralda': ['Pereira', 'Dosquebradas', 'Santa Rosa de Cabal'],
+'Caldas': ['Manizales', 'Villamaría', 'Chinchiná'],
+'Quindío': ['Armenia', 'Calarcá', 'La Tebaida'],
+'Tolima': ['Ibagué', 'Espinal', 'Melgar'],
+'Huila': ['Neiva', 'Pitalito', 'La Plata'],
+'Meta': ['Villavicencio', 'Acacías', 'Granada'],
+'Casanare': ['Yopal', 'Aguazul', 'Villanueva'],
+'Arauca': ['Arauca', 'Saravena', 'Fortul'],
+'Cauca': ['Popayán', 'Santander de Quilichao'],
+'Nariño': ['Pasto', 'Tumaco', 'Ipiales'],
+'Putumayo': ['Mocoa', 'Puerto Asís'],
+'Caquetá': ['Florencia', 'San Vicente del Caguán'],
+'Amazonas': ['Leticia'],
+'Vaupés': ['Mitú'],
+'Vichada': ['Puerto Carreño'],
+'Guainía': ['Inírida'],
+'Guaviare': ['San José del Guaviare'],
+'Chocó': ['Quibdó', 'Istmina'],
+'San Andrés y Providencia': ['San Andrés', 'Providencia'],
+'Boyacá': ['Tunja', 'Duitama', 'Sogamoso', 'Chiquinquirá']
+};
 
-    // Generar código automático basado en el nombre
+// 🆕 VARIABLES PARA MÓDULOS DINÁMICOS
+let availableModules = {};
+let modulesDependencies = {};
+let selectedModules = new Set();
+let validationTimeouts = {};
+let formData = {};
+
+// ===== INICIALIZACIÓN =====
+document.addEventListener('DOMContentLoaded', function() {
+    // Referencias a elementos principales
+    const departmentSelect = document.getElementById('department');
+    const citySelect = document.getElementById('city');
     const nameInput = document.getElementById('name');
     const codeInput = document.getElementById('code');
-    
-    nameInput.addEventListener('input', function() {
-        if (!codeInput.value) {
-            const name = this.value.trim();
-            if (name) {
-                // Extraer primeras letras de las palabras principales
-                const words = name.split(' ').filter(word => 
-                    word.length > 2 && 
-                    !['de', 'del', 'la', 'el', 'los', 'las', 'y', 'e'].includes(word.toLowerCase())
-                );
-                
-                let code = '';
-                words.slice(0, 3).forEach(word => {
-                    code += word.charAt(0).toUpperCase();
-                });
-                
-                // Añadir números si es muy corto
-                if (code.length < 3) {
-                    code += '001';
-                } else {
-                    code += '00' + Math.floor(Math.random() * 10);
-                }
-                
-                codeInput.value = code;
-            }
-        }
-    });
-
-    // Sincronizar email institucional con admin email
+    const subdomainInput = document.getElementById('subdomain');
     const emailInput = document.getElementById('email');
-    const adminEmailInput = document.getElementById('admin_email');
-    
-    emailInput.addEventListener('input', function() {
-        if (document.getElementById('create_admin').checked && !adminEmailInput.value) {
-            adminEmailInput.value = this.value;
-        }
-    });
-
-    // Toggle admin info section
+    const phoneInput = document.getElementById('phone');
     const createAdminCheckbox = document.getElementById('create_admin');
     const adminInfoBox = document.getElementById('admin-info');
-    
-    createAdminCheckbox.addEventListener('change', function() {
-        if (this.checked) {
-            adminInfoBox.style.display = 'block';
-            // Sync email if not set
-            if (emailInput.value && !adminEmailInput.value) {
-                adminEmailInput.value = emailInput.value;
-            }
-        } else {
-            adminInfoBox.style.display = 'none';
-        }
-    });
-
-    // Trigger initial state
-    if (createAdminCheckbox.checked) {
-        adminInfoBox.style.display = 'block';
-    }
-
-    // Preview logo function
-    window.previewLogo = function(input) {
-        if (input.files && input.files[0]) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const preview = document.getElementById('logo-preview');
-                preview.src = e.target.result;
-                preview.style.display = 'block';
-            };
-            reader.readAsDataURL(input.files[0]);
-        }
-    };
-
-    // Drag and drop for logo
-    const logoUpload = document.querySelector('.logo-upload');
-    
-    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-        logoUpload.addEventListener(eventName, preventDefaults, false);
-    });
-
-    function preventDefaults(e) {
-        e.preventDefault();
-        e.stopPropagation();
-    }
-
-    ['dragenter', 'dragover'].forEach(eventName => {
-        logoUpload.addEventListener(eventName, highlight, false);
-    });
-
-    ['dragleave', 'drop'].forEach(eventName => {
-        logoUpload.addEventListener(eventName, unhighlight, false);
-    });
-
-    function highlight(e) {
-        logoUpload.classList.add('dragover');
-    }
-
-    function unhighlight(e) {
-        logoUpload.classList.remove('dragover');
-    }
-
-    logoUpload.addEventListener('drop', handleDrop, false);
-
-    function handleDrop(e) {
-        const dt = e.dataTransfer;
-        const files = dt.files;
-        
-        if (files.length > 0) {
-            document.getElementById('logo').files = files;
-            previewLogo(document.getElementById('logo'));
-        }
-    }
-
-    // Validación en tiempo real
     const form = document.querySelector('form');
-    const requiredFields = form.querySelectorAll('[required]');
-    
-    requiredFields.forEach(field => {
-        field.addEventListener('blur', function() {
-            validateField(this);
-        });
+
+    // Configuración inicial de ubicación
+    departmentSelect.addEventListener('change', function() {
+        const departamento = this.value;
+        citySelect.innerHTML = '<option value="">Seleccionar ciudad...</option>';
         
-        field.addEventListener('input', function() {
-            if (this.classList.contains('is-invalid')) {
-                validateField(this);
+        if (departamento && ciudadesPorDepartamento[departamento]) {
+            ciudadesPorDepartamento[departamento].forEach(ciudad => {
+                const option = document.createElement('option');
+                option.value = ciudad;
+                option.textContent = ciudad;
+                citySelect.appendChild(option);
+            });
+            
+            if (departamento === 'Atlántico') {
+                citySelect.value = 'Barranquilla';
+                updateSubdomainPreview();
+            }
+        }
+    });
+
+    // Inicializar con Atlántico seleccionado
+    departmentSelect.dispatchEvent(new Event('change'));
+
+    // 🆕 CARGAR MÓDULOS DINÁMICAMENTE
+    loadAvailableModules();
+
+    // Configurar validaciones en tiempo real
+    setupValidations();
+    
+    // Configurar admin toggle
+    createAdminCheckbox.addEventListener('change', function() {
+        adminInfoBox.style.display = this.checked ? 'block' : 'none';
+        updateRequiredFields();
+    });
+
+    // Configurar guardado automático
+    setupAutosave();
+    
+    // Configurar validación del formulario
+    form.addEventListener('submit', handleFormSubmit);
+});
+
+// ===== 🆕 FUNCIONES PARA MÓDULOS DINÁMICOS =====
+
+async function loadAvailableModules() {
+    try {
+        showModulesLoading(true);
+        
+        const response = await fetch('/superadmin/api/modules/available');
+        const data = await response.json();
+        
+        if (data.success) {
+            availableModules = data.modules_by_category;
+            buildDependenciesMap();
+            renderModulesInForm();
+            showGlobalMessage(`${data.total_modules} módulos cargados exitosamente`, 'success');
+        } else {
+            throw new Error(data.error || 'Error al cargar módulos');
+        }
+        
+    } catch (error) {
+        console.error('Error cargando módulos:', error);
+        showGlobalMessage('Error al cargar módulos. Usando configuración por defecto.', 'warning');
+        renderFallbackModules();
+    } finally {
+        showModulesLoading(false);
+    }
+}
+
+function buildDependenciesMap() {
+    modulesDependencies = {};
+    
+    Object.values(availableModules).flat().forEach(module => {
+        modulesDependencies[module.code] = {
+            requires: module.requires_modules || [],
+            name: module.name,
+            dependents: []
+        };
+    });
+    
+    // Mapear dependientes
+    Object.entries(modulesDependencies).forEach(([moduleCode, moduleInfo]) => {
+        moduleInfo.requires.forEach(requiredCode => {
+            if (modulesDependencies[requiredCode]) {
+                modulesDependencies[requiredCode].dependents.push(moduleCode);
             }
         });
     });
+}
+
+function renderModulesInForm() {
+    const modulesContainer = document.getElementById('modules-container');
+    const modulesLoading = document.getElementById('modules-loading');
     
-    function validateField(field) {
-        const isValid = field.checkValidity();
-        
-        if (isValid) {
-            field.classList.remove('is-invalid');
-            field.classList.add('is-valid');
-        } else {
-            field.classList.remove('is-valid');
-            field.classList.add('is-invalid');
+    if (!modulesContainer) return;
+    
+    // Ocultar loading y mostrar container
+    modulesLoading.style.display = 'none';
+    modulesContainer.style.display = 'block';
+    modulesContainer.innerHTML = '';
+    
+    // Categorías a mostrar (excluyendo core)
+    const categoriesToShow = ['academic', 'administrative', 'communication', 'financial', 'optional'];
+    
+    categoriesToShow.forEach(category => {
+        if (availableModules[category] && availableModules[category].length > 0) {
+            const categorySection = createCategorySection(category, availableModules[category]);
+            modulesContainer.appendChild(categorySection);
         }
-        
-        return isValid;
+    });
+    
+    initializeModuleEvents();
+    updateModulesSummary();
+}
+
+function createCategorySection(category, modules) {
+    const section = document.createElement('div');
+    section.className = 'col-12 mb-4';
+    
+    const categoryName = getCategoryDisplayName(category);
+    const categoryIcon = getCategoryIcon(category);
+    
+    section.innerHTML = `
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-light">
+                <h6 class="mb-0">
+                    <i class="${categoryIcon} me-2 text-primary"></i>
+                    ${categoryName}
+                    <span class="badge bg-secondary ms-2">${modules.length}</span>
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    ${modules.map(module => createModuleCard(module)).join('')}
+                </div>
+            </div>
+        </div>
+    `;
+    
+    return section;
+}
+
+function createModuleCard(module) {
+    const isRecommended = ['students', 'teachers', 'communications'].includes(module.code);
+    const priceDisplay = module.monthly_price > 0 ? `${module.monthly_price}/mes` : 'Gratis';
+    const trialText = module.trial_days > 0 ? `${module.trial_days} días gratis` : '';
+    const dependenciesText = module.requires_modules.length > 0 ? 
+        `Requiere: ${module.requires_modules.join(', ')}` : '';
+    
+    return `
+        <div class="col-md-6 col-lg-4 mb-3">
+            <div class="module-card ${isRecommended ? 'border-primary' : ''}" id="module-${module.code}">
+                <div class="module-header" onclick="toggleModule('${module.code}')">
+                    <div class="module-icon bg-light text-primary">
+                        <i class="${module.icon}"></i>
+                    </div>
+                    <div class="module-info">
+                        <div class="module-name">
+                            ${module.name}
+                            ${isRecommended ? '<span class="badge bg-success ms-2">Recomendado</span>' : ''}
+                        </div>
+                        <div class="module-description">${module.description.substring(0, 100)}...</div>
+                        <div class="module-meta">
+                            <span class="module-price">${priceDisplay}</span>
+                            ${trialText ? `<span class="module-trial">${trialText}</span>` : ''}
+                            ${dependenciesText ? `<span class="module-dependencies">${dependenciesText}</span>` : ''}
+                        </div>
+                    </div>
+                    <div class="form-check ms-2">
+                        <input type="checkbox" 
+                               class="form-check-input module-checkbox" 
+                               id="module_${module.code}" 
+                               name="modules[]" 
+                               value="${module.code}"
+                               ${isRecommended ? 'checked' : ''}>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+function getCategoryDisplayName(category) {
+    const names = {
+        'academic': 'Módulos Académicos',
+        'administrative': 'Módulos Administrativos', 
+        'communication': 'Comunicación y Padres',
+        'financial': 'Gestión Financiera',
+        'optional': 'Módulos Opcionales'
+    };
+    return names[category] || category;
+}
+
+function getCategoryIcon(category) {
+    const icons = {
+        'academic': 'fas fa-graduation-cap',
+        'administrative': 'fas fa-clipboard-list',
+        'communication': 'fas fa-comments',
+        'financial': 'fas fa-dollar-sign',
+        'optional': 'fas fa-plus-circle'
+    };
+    return icons[category] || 'fas fa-puzzle-piece';
+}
+
+function toggleModule(moduleCode) {
+    const checkbox = document.getElementById(`module_${moduleCode}`);
+    const card = document.getElementById(`module-${moduleCode}`);
+    
+    if (!checkbox || !card) return;
+    
+    const isChecked = checkbox.checked;
+    
+    // Verificar dependencias si se está activando
+    if (!isChecked) {
+        const dependencies = modulesDependencies[moduleCode]?.requires || [];
+        for (const depCode of dependencies) {
+            const depCheckbox = document.getElementById(`module_${depCode}`);
+            if (!depCheckbox || !depCheckbox.checked) {
+                showGlobalMessage(`Para activar ${modulesDependencies[moduleCode]?.name}, primero debe activar: ${modulesDependencies[depCode]?.name}`, 'warning');
+                return;
+            }
+        }
     }
     
-    // Validación antes de envío
-    form.addEventListener('submit', function(e) {
-        let isFormValid = true;
+    // Verificar dependientes si se está desactivando
+    if (isChecked) {
+        const dependents = modulesDependencies[moduleCode]?.dependents || [];
+        const activeDependents = dependents.filter(depCode => {
+            const depCheckbox = document.getElementById(`module_${depCode}`);
+            return depCheckbox && depCheckbox.checked;
+        });
         
-        requiredFields.forEach(field => {
-            if (!validateField(field)) {
-                isFormValid = false;
+        if (activeDependents.length > 0) {
+            const dependentNames = activeDependents.map(code => modulesDependencies[code]?.name).join(', ');
+            showGlobalMessage(`No se puede desactivar porque los siguientes módulos dependen de este: ${dependentNames}`, 'warning');
+            return;
+        }
+    }
+    
+    // Toggle el checkbox
+    checkbox.checked = !isChecked;
+    
+    // Actualizar visualización
+    if (checkbox.checked) {
+        card.classList.add('selected');
+        selectedModules.add(moduleCode);
+        
+        // Auto-activar dependencias
+        const dependencies = modulesDependencies[moduleCode]?.requires || [];
+        dependencies.forEach(depCode => {
+            const depCheckbox = document.getElementById(`module_${depCode}`);
+            const depCard = document.getElementById(`module-${depCode}`);
+            if (depCheckbox && !depCheckbox.checked) {
+                depCheckbox.checked = true;
+                depCard.classList.add('selected');
+                selectedModules.add(depCode);
             }
         });
+    } else {
+        card.classList.remove('selected');
+        selectedModules.delete(moduleCode);
+    }
+    
+    updateModulesSummary();
+}
 
-        // Validar admin info si está marcado
+function initializeModuleEvents() {
+    // Marcar módulos recomendados como seleccionados
+    const recommendedModules = ['students', 'teachers', 'communications'];
+    recommendedModules.forEach(moduleCode => {
+        const checkbox = document.getElementById(`module_${moduleCode}`);
+        const card = document.getElementById(`module-${moduleCode}`);
+        if (checkbox && checkbox.checked) {
+            card.classList.add('selected');
+            selectedModules.add(moduleCode);
+        }
+    });
+    
+    // Agregar eventos de click a las cards
+    document.querySelectorAll('.module-card').forEach(card => {
+        card.addEventListener('click', (e) => {
+            if (e.target.type !== 'checkbox') {
+                const moduleCode = card.id.replace('module-', '');
+                toggleModule(moduleCode);
+            }
+        });
+    });
+}
+
+function updateModulesSummary() {
+    const summaryContainer = document.getElementById('modules-summary');
+    const summaryContent = document.getElementById('summary-content');
+    
+    if (!summaryContainer || !summaryContent) return;
+    
+    if (selectedModules.size === 0) {
+        summaryContainer.style.display = 'none';
+        return;
+    }
+    
+    summaryContainer.style.display = 'block';
+    
+    const selectedModulesList = Array.from(selectedModules);
+    let totalCost = 0;
+    let modulesInfo = [];
+    
+    selectedModulesList.forEach(code => {
+        const module = Object.values(availableModules).flat().find(m => m.code === code);
+        if (module) {
+            totalCost += module.monthly_price;
+            modulesInfo.push({
+                name: module.name,
+                price: module.monthly_price,
+                trial: module.trial_days
+            });
+        }
+    });
+    
+    summaryContent.innerHTML = `
+        <div class="row">
+            <div class="col-md-8">
+                <strong>Módulos seleccionados (${selectedModules.size}):</strong>
+                <ul class="mb-0 mt-1">
+                    ${modulesInfo.map(m => `
+                        <li>${m.name} 
+                            <span class="text-muted">
+                                - ${m.price}/mes 
+                                ${m.trial > 0 ? `(${m.trial} días gratis)` : ''}
+                            </span>
+                        </li>
+                    `).join('')}
+                </ul>
+            </div>
+            <div class="col-md-4 text-end">
+                <div class="h5 mb-0">Total: ${totalCost}/mes</div>
+                <small class="text-muted">Después del período de prueba</small>
+            </div>
+        </div>
+    `;
+}
+
+function showModulesLoading(show) {
+    const loadingEl = document.getElementById('modules-loading');
+    const containerEl = document.getElementById('modules-container');
+    
+    if (show) {
+        loadingEl.style.display = 'block';
+        containerEl.style.display = 'none';
+    } else {
+        loadingEl.style.display = 'none';
+        containerEl.style.display = 'block';
+    }
+}
+
+function renderFallbackModules() {
+    const modulesContainer = document.getElementById('modules-container');
+    const modulesError = document.getElementById('modules-error');
+    
+    if (!modulesContainer) return;
+    
+    // Mostrar error
+    modulesError.style.display = 'block';
+    
+    // Renderizar módulos básicos hardcodeados como fallback
+    const fallbackModules = [
+        { code: 'students', name: 'Gestión de Estudiantes', icon: 'fas fa-user-graduate' },
+        { code: 'teachers', name: 'Gestión de Docentes', icon: 'fas fa-chalkboard-teacher' },
+        { code: 'communications', name: 'Comunicaciones', icon: 'fas fa-comments' },
+        { code: 'reports', name: 'Reportes', icon: 'fas fa-file-alt' }
+    ];
+    
+    modulesContainer.innerHTML = `
+        <div class="col-12">
+            <div class="card border-warning">
+                <div class="card-header bg-warning bg-opacity-10">
+                    <h6 class="mb-0">
+                        <i class="fas fa-exclamation-triangle me-2 text-warning"></i>
+                        Módulos Básicos (Modo de Emergencia)
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        ${fallbackModules.map(module => `
+                            <div class="col-md-6 mb-2">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" 
+                                           id="fallback_${module.code}" name="modules[]" 
+                                           value="${module.code}" checked>
+                                    <label class="form-check-label" for="fallback_${module.code}">
+                                        <i class="${module.icon} me-2"></i>${module.name}
+                                    </label>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    showModulesLoading(false);
+}
+
+// ===== FUNCIONES EXISTENTES (mantenidas) =====
+
+function setupValidations() {
+    const nameInput = document.getElementById('name');
+    const codeInput = document.getElementById('code');
+    const subdomainInput = document.getElementById('subdomain');
+    const emailInput = document.getElementById('email');
+    const phoneInput = document.getElementById('phone');
+
+    // Generar código automáticamente
+    nameInput.addEventListener('input', function() {
+        const name = this.value.trim();
+        
+        if (!codeInput.value && name) {
+            const suggestedCode = generateSmartCode(name);
+            codeInput.value = suggestedCode;
+            
+            if (suggestedCode.length >= 3) {
+                clearTimeout(validationTimeouts.code);
+                validationTimeouts.code = setTimeout(() => {
+                    validateCodeUnique(suggestedCode, codeInput);
+                }, 200);
+            }
+        }
+        
+        if (!subdomainInput.value && name) {
+            const suggestedSubdomain = generateSubdomainFromName(name);
+            subdomainInput.value = suggestedSubdomain;
+            updateSubdomainPreview();
+            
+            if (suggestedSubdomain.length >= 3) {
+                clearTimeout(validationTimeouts.subdomain);
+                validationTimeouts.subdomain = setTimeout(() => {
+                    validateSubdomainUnique(suggestedSubdomain, subdomainInput);
+                }, 500);
+            }
+        }
+        
+        if (name && !emailInput.value) {
+            const suggestedEmail = generateInstitutionalEmail(name);
+            emailInput.placeholder = `Ej: ${suggestedEmail}`;
+        }
+    });
+
+    // Validación de código único
+    codeInput.addEventListener('input', function() {
+        const code = this.value.trim().toUpperCase();
+        this.value = code;
+        
+        if (code.length >= 3) {
+            clearTimeout(validationTimeouts.code);
+            validationTimeouts.code = setTimeout(() => {
+                validateCodeUnique(code, this);
+            }, 800);
+        }
+        updateSubdomainPreview();
+    });
+
+    // Validación de email
+    emailInput.addEventListener('input', function() {
+        clearTimeout(validationTimeouts.email);
+        validationTimeouts.email = setTimeout(() => {
+            validateEmailAdvanced(this);
+        }, 500);
+        
+        const createAdminCheckbox = document.getElementById('create_admin');
         if (createAdminCheckbox.checked) {
             const adminEmailField = document.getElementById('admin_email');
             if (!adminEmailField.value) {
-                adminEmailField.classList.add('is-invalid');
-                isFormValid = false;
+                adminEmailField.value = this.value;
             }
+        }
+    });
+
+    // Formatear teléfono
+    phoneInput.addEventListener('input', function() {
+        const formatted = formatColombianPhone(this.value);
+        this.value = formatted;
+        validateColombianPhone(this);
+    });
+
+    // Validación de subdominio
+    subdomainInput.addEventListener('input', function() {
+        let subdomain = this.value.toLowerCase().trim();
+        
+        subdomain = subdomain.replace(/[^a-z0-9\-]/g, '');
+        subdomain = subdomain.replace(/^-+|-+$/g, '');
+        subdomain = subdomain.replace(/-+/g, '-');
+        
+        if (subdomain.length > 30) {
+            subdomain = subdomain.substring(0, 30);
         }
         
-        if (!isFormValid) {
-            e.preventDefault();
-            
-            // Scroll al primer campo inválido
-            const firstInvalid = form.querySelector('.is-invalid');
-            if (firstInvalid) {
-                firstInvalid.scrollIntoView({ 
-                    behavior: 'smooth', 
-                    block: 'center' 
-                });
-                firstInvalid.focus();
-            }
-            
-            // Mostrar mensaje de error
-            const alert = document.createElement('div');
-            alert.className = 'alert alert-danger alert-dismissible fade show';
-            alert.innerHTML = `
-                <i class="fas fa-exclamation-triangle me-2"></i>
-                Por favor, complete todos los campos requeridos correctamente.
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            `;
-            
-            form.insertBefore(alert, form.firstChild);
-            
-            // Auto-remover después de 5 segundos
-            setTimeout(() => {
-                if (alert.parentNode) {
-                    alert.remove();
-                }
-            }, 5000);
+        this.value = subdomain;
+        updateSubdomainPreview();
+        
+        if (subdomain.length >= 3) {
+            clearTimeout(validationTimeouts.subdomain);
+            validationTimeouts.subdomain = setTimeout(() => {
+                validateSubdomainUnique(subdomain, this);
+            }, 800);
+        } else if (subdomain.length > 0) {
+            showFieldError(this, 'El subdominio debe tener al menos 3 caracteres');
         }
+    });
+
+    // Actualizar vista previa de subdominio
+    const citySelect = document.getElementById('city');
+    citySelect.addEventListener('change', function() {
+        updateSubdomainPreview();
+    });
+
+    // Validación de niveles educativos
+    const nivelesCheckboxes = document.querySelectorAll('input[name="niveles[]"]');
+    nivelesCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', validateNiveles);
+    });
+}
+
+function updateRequiredFields() {
+    const createAdminCheckbox = document.getElementById('create_admin');
+    const adminFields = ['admin_name', 'admin_email'];
+    adminFields.forEach(fieldId => {
+        const field = document.getElementById(fieldId);
+        if (createAdminCheckbox.checked) {
+            field.setAttribute('required', '');
+        } else {
+            field.removeAttribute('required');
+        }
+    });
+}
+
+function validateNiveles() {
+    const checked = document.querySelectorAll('input[name="niveles[]"]:checked');
+    const container = document.querySelector('input[name="niveles[]"]').closest('.form-group');
+    
+    if (checked.length === 0) {
+        showFieldError(container, 'Debe seleccionar al menos un nivel educativo');
+        return false;
+    } else {
+        showFieldSuccess(container, `${checked.length} nivel(es) seleccionado(s)`);
+        return true;
+    }
+}
+
+async function validateCodeUnique(code, inputElement) {
+    if (!code || code.length < 3) return;
+    
+    try {
+        showFieldLoading(inputElement, true);
+        
+        const response = await simulateCodeValidation(code);
+        
+        if (response.exists) {
+            showFieldError(inputElement, `El código "${code}" ya existe. Sugerencia: ${response.suggestion}`);
+            
+            if (response.suggestion) {
+                setTimeout(() => {
+                    if (confirm(`¿Usar el código sugerido "${response.suggestion}"?`)) {
+                        inputElement.value = response.suggestion;
+                        validateCodeUnique(response.suggestion, inputElement);
+                    }
+                }, 1000);
+            }
+        } else {
+            showFieldSuccess(inputElement, `Código "${code}" disponible`);
+        }
+    } catch (error) {
+        console.error('Error validating code:', error);
+        showFieldWarning(inputElement, 'No se pudo verificar el código');
+    } finally {
+        showFieldLoading(inputElement, false);
+    }
+}
+
+async function validateEmailAdvanced(inputElement, isAdmin = false) {
+    const email = inputElement.value.trim();
+    if (!email) return;
+    
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+        showFieldError(inputElement, 'Formato de email inválido');
+        return;
+    }
+    
+    const institutionalDomains = ['.edu.co', '.edu', '.gov.co'];
+    const hasInstitutionalDomain = institutionalDomains.some(domain => email.includes(domain));
+    
+    if (!isAdmin && !hasInstitutionalDomain) {
+        showFieldWarning(inputElement, 'Considere usar un dominio institucional (.edu.co)');
+    }
+    
+    try {
+        showFieldLoading(inputElement, true);
+        
+        const response = await simulateEmailValidation(email);
+        
+        if (response.exists) {
+            showFieldError(inputElement, 'Este email ya está registrado en el sistema');
+        } else {
+            showFieldSuccess(inputElement, 'Email disponible');
+        }
+    } catch (error) {
+        console.error('Error validating email:', error);
+        showFieldWarning(inputElement, 'No se pudo verificar el email');
+    } finally {
+        showFieldLoading(inputElement, false);
+    }
+}
+
+function validateColombianPhone(inputElement) {
+    const phone = inputElement.value.replace(/\D/g, '');
+    
+    if (phone.length === 0) return;
+    
+    const validPatterns = [
+        { pattern: /^57[3][0-9]{9}$/, type: 'Celular' },
+        { pattern: /^57[5][0-9]{7}$/, type: 'Fijo Barranquilla' },
+        { pattern: /^57[1][0-9]{7}$/, type: 'Fijo Bogotá' },
+        { pattern: /^57[4][0-9]{7}$/, type: 'Fijo Medellín' },
+        { pattern: /^57[2][0-9]{7}$/, type: 'Fijo Cali' }
+    ];
+    
+    const validFormat = validPatterns.find(p => p.pattern.test(phone));
+    
+    if (validFormat) {
+        showFieldSuccess(inputElement, `Formato válido: ${validFormat.type}`);
+    } else if (phone.length >= 10) {
+        showFieldError(inputElement, 'Formato de teléfono colombiano inválido');
+    }
+}
+
+function generateSmartCode(name) {
+    const cleanName = name.toLowerCase()
+        .replace(/[áàäâã]/g, 'a')
+        .replace(/[éèëê]/g, 'e')
+        .replace(/[íìïî]/g, 'i')
+        .replace(/[óòöôõ]/g, 'o')
+        .replace(/[úùüû]/g, 'u')
+        .replace(/ñ/g, 'n');
+    
+    const words = cleanName.split(' ').filter(word => 
+        word.length > 2 && 
+        !['del', 'de', 'la', 'el', 'los', 'las', 'y', 'e', 'para'].includes(word)
+    );
+    
+    let code = '';
+    
+    if (words.length >= 3) {
+        code = words.slice(0, 3).map(word => word[0].toUpperCase()).join('');
+    } else if (words.length === 2) {
+        code = words[0].substring(0, 2).toUpperCase() + words[1][0].toUpperCase();
+    } else if (words.length === 1) {
+        code = words[0].substring(0, 3).toUpperCase();
+    }
+    
+    const timestamp = Date.now().toString().slice(-3);
+    code += timestamp;
+    
+    return code;
+}
+
+function generateInstitutionalEmail(name) {
+    const cleanName = name.toLowerCase()
+        .replace(/[^a-z0-9]/g, '')
+        .substring(0, 10);
+    return `info@${cleanName}.edu.co`;
+}
+
+function generateSubdomainFromName(name) {
+    let cleanName = name.toLowerCase()
+        .replace(/institución educativa/gi, '')
+        .replace(/colegio/gi, '')
+        .replace(/universidad/gi, '')
+        .replace(/instituto/gi, '')
+        .replace(/distrital/gi, '')
+        .replace(/departamental/gi, '')
+        .replace(/nacional/gi, '')
+        .replace(/técnico/gi, '')
+        .replace(/tecnológico/gi, '');
+
+    cleanName = cleanName
+        .replace(/[áàäâã]/g, 'a')
+        .replace(/[éèëê]/g, 'e')
+        .replace(/[íìïî]/g, 'i')
+        .replace(/[óòöôõ]/g, 'o')
+        .replace(/[úùüû]/g, 'u')
+        .replace(/ñ/g, 'n')
+        .replace(/ç/g, 'c');
+
+    const words = cleanName.split(/\s+/)
+        .filter(word => word.length > 2)
+        .filter(word => !['del', 'de', 'la', 'el', 'los', 'las', 'y', 'e', 'para', 'con', 'por', 'san', 'santa'].includes(word));
+
+    let subdomain = '';
+
+    if (words.length === 0) {
+        subdomain = name.toLowerCase()
+            .replace(/[^a-z0-9]/g, '')
+            .substring(0, 15);
+    } else if (words.length === 1) {
+        subdomain = words[0];
+    } else if (words.length === 2) {
+        subdomain = words.join('');
+    } else if (words.length === 3) {
+        subdomain = words.slice(0, 3).join('');
+    } else {
+        const sortedWords = words
+            .sort((a, b) => b.length - a.length)
+            .slice(0, 3);
+        subdomain = sortedWords.join('');
+    }
+
+    subdomain = subdomain
+        .replace(/[^a-z0-9]/g, '')
+        .substring(0, 25);
+
+    if (subdomain.length < 5 && words.length > 0) {
+        const firstWord = words[0];
+        if (firstWord && firstWord.length > subdomain.length) {
+            subdomain = firstWord.substring(0, 15);
+        }
+    }
+
+    return subdomain || 'institucion';
+}
+
+async function validateSubdomainUnique(subdomain, inputElement) {
+    if (!subdomain || subdomain.length < 3) return;
+    
+    try {
+        showFieldLoading(inputElement, true);
+        
+        const response = await simulateSubdomainValidation(subdomain);
+        
+        if (response.exists) {
+            showFieldError(inputElement, `El subdominio "${subdomain}" ya está en uso`);
+            
+            if (response.suggestions && response.suggestions.length > 0) {
+                displaySubdomainSuggestions(response.suggestions);
+            }
+        } else {
+            showFieldSuccess(inputElement, `Subdominio "${subdomain}" disponible`);
+            hideSubdomainSuggestions();
+        }
+    } catch (error) {
+        console.error('Error validating subdomain:', error);
+        showFieldWarning(inputElement, 'No se pudo verificar el subdominio');
+    } finally {
+        showFieldLoading(inputElement, false);
+    }
+}
+
+function updateSubdomainPreview() {
+    const subdomainInput = document.getElementById('subdomain');
+    const subdomain = subdomainInput.value || 'subdominio';
+    const preview = document.getElementById('subdomain-preview');
+    preview.textContent = `https://${subdomain}.educontrol.co`;
+    preview.className = subdomain.length >= 3 ? 'text-success' : 'text-muted';
+}
+
+function formatColombianPhone(value) {
+    const numbers = value.replace(/\D/g, '');
+    
+    if (numbers.startsWith('57')) {
+        return '+57 ' + numbers.substring(2).replace(/(\d{3})(\d{3})(\d{4})/, '$1 $2 $3');
+    } else if (numbers.startsWith('3') && numbers.length === 10) {
+        return '+57 ' + numbers.replace(/(\d{3})(\d{3})(\d{4})/, '$1 $2 $3');
+    } else if (numbers.startsWith('5') && numbers.length === 8) {
+        return '+57 ' + numbers.replace(/(\d{1})(\d{3})(\d{4})/, '$1 $2 $3');
+    }
+    
+    return '+57 ' + numbers;
+}
+
+async function simulateCodeValidation(code) {
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    const existingCodes = ['ABC001', 'DEF002', 'GHI003', 'CSJ001'];
+    const exists = existingCodes.includes(code);
+    
+    return {
+        exists,
+        suggestion: exists ? code.slice(0, -1) + (parseInt(code.slice(-1)) + 1) : null
+    };
+}
+
+async function simulateSubdomainValidation(subdomain) {
+    await new Promise(resolve => setTimeout(resolve, 1200));
+    
+    const existingSubdomains = [
+        'colegiosan', 'sanmartin', 'lasamericas', 
+        'bolivariano', 'sanfrancisco', 'santamaria', 'nuevohorizonte',
+        'liceomoderno', 'gimnasiointegral', 'colegioamericano'
+    ];
+    
+    const exists = existingSubdomains.includes(subdomain);
+    
+    let suggestions = [];
+    if (exists) {
+        suggestions = generateSubdomainAlternatives(subdomain);
+        suggestions = suggestions.filter(suggestion => 
+            !existingSubdomains.includes(suggestion)
+        ).slice(0, 4);
+    }
+    
+    return { exists, suggestions };
+}
+
+function generateSubdomainAlternatives(subdomain) {
+    const alternatives = [];
+    
+    for (let i = 1; i <= 5; i++) {
+        alternatives.push(`${subdomain}${i}`);
+    }
+    
+    const suffixes = ['ed', 'col', 'inst', 'edu', 'acad'];
+    suffixes.forEach(suffix => {
+        alternatives.push(`${subdomain}${suffix}`);
     });
     
-    // Formatear teléfono
-    const phoneInput = document.getElementById('phone');
-    phoneInput.addEventListener('input', function() {
-        let value = this.value.replace(/\D/g, '');
-        if (value.startsWith('57')) {
-            value = '+57 ' + value.substring(2);
-        } else if (value.length > 0 && !value.startsWith('+')) {
-            value = '+57 ' + value;
-        }
-        this.value = value;
+    const currentYear = new Date().getFullYear();
+    alternatives.push(`${subdomain}${currentYear}`);
+    
+    if (subdomain.length > 10) {
+        const short = subdomain.substring(0, 10);
+        alternatives.push(short);
+        alternatives.push(`${short}ed`);
+        alternatives.push(`${short}col`);
+    }
+    
+    const citySelect = document.getElementById('city');
+    const city = citySelect.value;
+    if (city) {
+        const cityClean = city.toLowerCase().replace(/[^a-z]/g, '').substring(0, 8);
+        alternatives.push(`${subdomain}${cityClean}`);
+        alternatives.push(`${cityClean}${subdomain}`);
+    }
+    
+    return [...new Set(alternatives)];
+}
+
+function displaySubdomainSuggestions(suggestions) {
+    const suggestionsContainer = document.getElementById('subdomain-suggestions');
+    const suggestionsList = document.getElementById('suggestions-list');
+    
+    suggestionsList.innerHTML = '';
+    
+    suggestions.forEach(suggestion => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'btn btn-outline-primary btn-sm';
+        button.textContent = suggestion;
+        button.onclick = () => selectSubdomainSuggestion(suggestion);
+        suggestionsList.appendChild(button);
     });
-});
+    
+    suggestionsContainer.style.display = 'block';
+}
+
+function hideSubdomainSuggestions() {
+    const suggestionsContainer = document.getElementById('subdomain-suggestions');
+    suggestionsContainer.style.display = 'none';
+}
+
+function selectSubdomainSuggestion(suggestion) {
+    const subdomainInput = document.getElementById('subdomain');
+    subdomainInput.value = suggestion;
+    updateSubdomainPreview();
+    hideSubdomainSuggestions();
+    
+    clearTimeout(validationTimeouts.subdomain);
+    validationTimeouts.subdomain = setTimeout(() => {
+        validateSubdomainUnique(suggestion, subdomainInput);
+    }, 300);
+    
+    showGlobalMessage(`Subdominio "${suggestion}" seleccionado`, 'success');
+}
+
+async function simulateEmailValidation(email) {
+    await new Promise(resolve => setTimeout(resolve, 800));
+    
+    const existingEmails = ['admin@colegio.edu.co', 'info@universidad.edu.co'];
+    return { exists: existingEmails.includes(email) };
+}
+
+function showFieldLoading(element, show = true) {
+    const indicator = getOrCreateIndicator(element);
+    if (show) {
+        indicator.innerHTML = '<i class="fas fa-spinner fa-spin text-primary"></i> Verificando...';
+        indicator.className = 'field-indicator loading';
+    } else {
+        indicator.style.display = 'none';
+    }
+}
+
+function showFieldSuccess(element, message = '') {
+    const indicator = getOrCreateIndicator(element);
+    indicator.innerHTML = `<i class="fas fa-check-circle text-success"></i> ${message}`;
+    indicator.className = 'field-indicator success';
+    element.classList.remove('is-invalid');
+    element.classList.add('is-valid');
+}
+
+function showFieldError(element, message = '') {
+    const indicator = getOrCreateIndicator(element);
+    indicator.innerHTML = `<i class="fas fa-exclamation-circle text-danger"></i> ${message}`;
+    indicator.className = 'field-indicator error';
+    element.classList.remove('is-valid');
+    element.classList.add('is-invalid');
+}
+
+function showFieldWarning(element, message = '') {
+    const indicator = getOrCreateIndicator(element);
+    indicator.innerHTML = `<i class="fas fa-exclamation-triangle text-warning"></i> ${message}`;
+    indicator.className = 'field-indicator warning';
+}
+
+function getOrCreateIndicator(element) {
+    let indicator = element.parentNode.querySelector('.field-indicator');
+    if (!indicator) {
+        indicator = document.createElement('div');
+        indicator.className = 'field-indicator';
+        indicator.style.cssText = 'margin-top: 0.25rem; font-size: 0.875rem; display: block;';
+        element.parentNode.appendChild(indicator);
+    }
+    indicator.style.display = 'block';
+    return indicator;
+}
+
+function handleFormSubmit(e) {
+    const form = e.target;
+    let isFormValid = true;
+    let errorMessages = [];
+    
+    // Validar campos requeridos
+    const requiredFields = form.querySelectorAll('[required]');
+    requiredFields.forEach(field => {
+        if (!field.value.trim()) {
+            field.classList.add('is-invalid');
+            isFormValid = false;
+            errorMessages.push(`${getFieldLabel(field)} es requerido`);
+        }
+    });
+
+    // Validar niveles educativos
+    if (!validateNiveles()) {
+        isFormValid = false;
+        errorMessages.push('Debe seleccionar al menos un nivel educativo');
+    }
+
+    // Validar admin si está marcado
+    const createAdminCheckbox = document.getElementById('create_admin');
+    if (createAdminCheckbox.checked) {
+        const adminNameField = document.getElementById('admin_name');
+        const adminEmailField = document.getElementById('admin_email');
+        
+        if (!adminNameField.value.trim()) {
+            adminNameField.classList.add('is-invalid');
+            isFormValid = false;
+            errorMessages.push('Nombre del administrador es requerido');
+        }
+        
+        if (!adminEmailField.value.trim()) {
+            adminEmailField.classList.add('is-invalid');
+            isFormValid = false;
+            errorMessages.push('Email del administrador es requerido');
+        }
+    }
+    
+    // Validar que al menos un módulo esté seleccionado
+    const selectedModulesArray = Array.from(form.querySelectorAll('input[name="modules[]"]:checked'));
+    if (selectedModulesArray.length === 0) {
+        isFormValid = false;
+        errorMessages.push('Debe seleccionar al menos un módulo');
+    }
+    
+    if (!isFormValid) {
+        e.preventDefault();
+        
+        showErrorSummary(errorMessages);
+        
+        const firstInvalid = form.querySelector('.is-invalid');
+        if (firstInvalid) {
+            firstInvalid.scrollIntoView({ 
+                behavior: 'smooth', 
+                block: 'center' 
+            });
+            firstInvalid.focus();
+        }
+    } else {
+        const submitBtn = form.querySelector('button[type="submit"]');
+        const originalText = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Creando institución...';
+        submitBtn.disabled = true;
+        
+        localStorage.removeItem('institution_draft');
+        showGlobalMessage('Institución creada exitosamente', 'success');
+    }
+}
+
+function getFieldLabel(field) {
+    const label = document.querySelector(`label[for="${field.id}"]`);
+    return label ? label.textContent.replace('*', '').trim() : field.name || field.id;
+}
+
+function showErrorSummary(errors) {
+    const existingErrors = document.querySelectorAll('.alert-danger');
+    existingErrors.forEach(error => error.remove());
+    
+    const errorSummary = document.createElement('div');
+    errorSummary.className = 'alert alert-danger alert-dismissible fade show';
+    errorSummary.innerHTML = `
+        <h6><i class="fas fa-exclamation-triangle me-2"></i>Por favor corrija los siguientes errores:</h6>
+        <ul class="mb-0">
+            ${errors.map(msg => `<li>${msg}</li>`).join('')}
+        </ul>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    const form = document.querySelector('form');
+    form.insertBefore(errorSummary, form.firstChild);
+    
+    setTimeout(() => {
+        if (errorSummary.parentNode) {
+            errorSummary.remove();
+        }
+    }, 10000);
+}
+
+function showGlobalMessage(message, type = 'info') {
+    const notification = document.createElement('div');
+    notification.className = `alert alert-${type} alert-dismissible fade show`;
+    notification.style.cssText = 'position: fixed; top: 20px; right: 20px; z-index: 9999; max-width: 350px;';
+    notification.innerHTML = `
+        <i class="fas fa-${type === 'success' ? 'check' : type === 'error' ? 'exclamation-triangle' : 'info'}-circle me-2"></i>
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        if (notification.parentNode) {
+            notification.remove();
+        }
+    }, 5000);
+}
+
+function setupAutosave() {
+    const formFields = document.querySelectorAll('input, select, textarea');
+    let formData = {};
+
+    const savedDraft = localStorage.getItem('institution_draft');
+    if (savedDraft && confirm('¿Desea restaurar el borrador guardado?')) {
+        try {
+            const draft = JSON.parse(savedDraft);
+            Object.keys(draft).forEach(key => {
+                const field = document.getElementById(key);
+                if (field && field.type !== 'file') {
+                    field.value = draft[key];
+                    if (field.type === 'checkbox') {
+                        field.checked = draft[key];
+                    }
+                }
+            });
+            
+            const departmentSelect = document.getElementById('department');
+            departmentSelect.dispatchEvent(new Event('change'));
+            showGlobalMessage('Borrador restaurado exitosamente', 'info');
+        } catch (e) {
+            console.error('Error restoring draft:', e);
+        }
+    }
+
+    setInterval(() => {
+        const currentData = {};
+        formFields.forEach(field => {
+            if (field.id && field.type !== 'file') {
+                currentData[field.id] = field.type === 'checkbox' ? field.checked : field.value;
+            }
+        });
+        
+        if (JSON.stringify(currentData) !== JSON.stringify(formData)) {
+            formData = currentData;
+            localStorage.setItem('institution_draft', JSON.stringify(formData));
+            showDraftIndicator();
+        }
+    }, 30000);
+}
+
+function showDraftIndicator() {
+    let indicator = document.getElementById('draft-indicator');
+    if (!indicator) {
+        indicator = document.createElement('div');
+        indicator.id = 'draft-indicator';
+        indicator.style.cssText = `
+            position: fixed; bottom: 20px; right: 20px; z-index: 1000;
+            background: rgba(142, 45, 226, 0.9); color: white;
+            padding: 0.5rem 1rem; border-radius: 20px; font-size: 0.875rem;
+            font-weight: 500; box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            transition: all 0.3s ease;
+        `;
+        indicator.innerHTML = '<i class="fas fa-save me-1"></i>Borrador guardado';
+        document.body.appendChild(indicator);
+        
+        setTimeout(() => {
+            indicator.style.opacity = '0.7';
+            setTimeout(() => {
+                if (indicator.parentNode) {
+                    indicator.remove();
+                }
+            }, 3000);
+        }, 2000);
+    }
+}
+
+function saveDraft() {
+    const formFields = document.querySelectorAll('input, select, textarea');
+    const draftData = {};
+
+    formFields.forEach(field => {
+        if (field.id && field.type !== 'file') {
+            draftData[field.id] = field.type === 'checkbox' ? field.checked : field.value;
+        }
+    });
+
+    localStorage.setItem('institution_draft', JSON.stringify(draftData));
+    showGlobalMessage('Borrador guardado exitosamente', 'success');
+}
+
+// Funciones globales para botones
+function generateSubdomainSuggestions() {
+    const name = document.getElementById('name').value.trim();
+
+    if (!name) {
+        showGlobalMessage('Primero ingrese el nombre de la institución', 'warning');
+        document.getElementById('name').focus();
+        return;
+    }
+
+    const suggestions = [];
+
+    suggestions.push(generateSubdomainFromName(name));
+
+    const keyWords = name.toLowerCase()
+        .replace(/institución educativa|colegio|universidad|instituto/gi, '')
+        .split(/\s+/)
+        .filter(word => word.length > 3)
+        .slice(0, 2)
+        .join('');
+    if (keyWords && keyWords !== suggestions[0]) {
+        suggestions.push(keyWords);
+    }
+
+    const words = name.split(/\s+/).filter(word => word.length > 2);
+    if (words.length > 1) {
+        const initials = words.slice(0, -1).map(w => w[0].toLowerCase()).join('');
+        const lastWord = words[words.length - 1].toLowerCase().replace(/[^a-z]/g, '');
+        const suggestion3 = initials + lastWord;
+        if (suggestion3.length >= 3 && !suggestions.includes(suggestion3)) {
+            suggestions.push(suggestion3);
+        }
+    }
+
+    const abbreviation = name.toLowerCase()
+        .replace(/institución|educativa|distrital|departamental|nacional/gi, '')
+        .split(/\s+/)
+        .filter(word => word.length > 0)
+        .map(word => word.substring(0, 3))
+        .join('')
+        .substring(0, 15);
+    if (abbreviation.length >= 3 && !suggestions.includes(abbreviation)) {
+        suggestions.push(abbreviation);
+    }
+
+    const cleanSuggestions = suggestions
+        .map(s => s.replace(/[^a-z0-9]/g, '').substring(0, 25))
+        .filter(s => s.length >= 3)
+        .slice(0, 4);
+
+    if (cleanSuggestions.length > 0) {
+        displaySubdomainSuggestions(cleanSuggestions);
+        showGlobalMessage(`${cleanSuggestions.length} sugerencias generadas`, 'info');
+    } else {
+        showGlobalMessage('No se pudieron generar sugerencias válidas', 'warning');
+    }
+}
+
+function checkSubdomainAvailability() {
+    const subdomainInput = document.getElementById('subdomain');
+    const subdomain = subdomainInput.value.trim();
+
+    if (!subdomain) {
+        showGlobalMessage('Ingrese un subdominio para verificar', 'warning');
+        subdomainInput.focus();
+        return;
+    }
+
+    if (subdomain.length < 3) {
+        showGlobalMessage('El subdominio debe tener al menos 3 caracteres', 'warning');
+        return;
+    }
+
+    validateSubdomainUnique(subdomain, subdomainInput);
+}
 </script>
-{% endblock %}
+</body>
+</html>
